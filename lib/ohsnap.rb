@@ -1,5 +1,2 @@
-require "ohsnap/version"
-
-module Ohsnap
-  # Your code goes here...
-end
+require 'ohsnap/version'
+require 'ohsnap/cli/root'
