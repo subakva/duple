@@ -1,6 +1,6 @@
 module Ohsnap
   module CLI
-    class Refresh < Thor::Group
+    class Copy < Thor::Group
       include Ohsnap::CLI::Helpers
 
       source_option
@@ -10,7 +10,7 @@ module Ohsnap
       tables_option
 
       def print_something
-        puts 'Refresh!'
+        puts 'Copy!'
       end
     end
   end

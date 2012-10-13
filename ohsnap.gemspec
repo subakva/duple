@@ -8,12 +8,20 @@ Gem::Specification.new do |gem|
   gem.version       = Ohsnap::VERSION
   gem.authors       = ["Jason Wadsworth"]
   gem.email         = ["jdwadsworth@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.description   = %q{
+    Ohsnap simplifies moving and processing data snapshots between development,
+    testing and production environements.
+  }
+  gem.summary       = %q{Moves PostgreSQL data from here to there.}
+  gem.homepage      = "https://github.com/subakva/ohsnap"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
+
+  gem.add_dependency("thor")
+  gem.add_development_dependency("rake", ['~> 0.9.2'])
+  gem.add_development_dependency("rspec", ['~> 2.11.0'])
+
 end
