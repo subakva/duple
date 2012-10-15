@@ -105,12 +105,16 @@ module Ohsnap
           @target_appname ||= config.heroku_name(config.target_environment)
         end
 
+        def dump_dir_path
+          File.join('tmp', 'ohsnap')
+        end
+
         def data_file_path
-          @data_file_path ||= File.join('tmp', 'ohsnap', "#{config.source_name}-data.dump")
+          @data_file_path ||= File.join(dump_dir_path, "#{config.source_name}-data.dump")
         end
 
         def structure_file_path
-          @structure_file_path ||= File.join('tmp', 'ohsnap', "#{config.source_name}-structure.dump")
+          @structure_file_path ||= File.join(dump_dir_path, "#{config.source_name}-structure.dump")
         end
 
         def fetch_heroku_credentials(appname)
@@ -121,7 +125,9 @@ module Ohsnap
           db_url = config_vars.split("\n").detect { |l| l =~ /DATABASE_URL/ }
           raise ArgumentError.new("Missing DATABASE_URL variable for #{appname}") if db_url.nil?
 
-          db_url.match(/postgres:\/\/(?<user>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<db>.*)/)
+          db_url.match(
+            /postgres:\/\/(?<user>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<db>.*)/
+          )
         end
 
         def source_credentials
