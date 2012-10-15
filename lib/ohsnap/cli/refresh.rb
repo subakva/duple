@@ -11,7 +11,6 @@ module Ohsnap
       tables_option
 
       def do_something
-        runner.run('echo "Refresh!"')
       end
     end
   end
