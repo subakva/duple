@@ -12,8 +12,8 @@ module Ohsnap
       tables_option
 
       def require_either_tables_or_group
-        unless options[:group] || options[:tables]
-          raise ArgumentError.new("Either --group or --tables options must be provided.")
+        unless options[:group] || (options[:tables] && options[:tables].size > 0)
+          raise ArgumentError.new("One of --group or --tables options is required.")
         end
       end
 
@@ -22,11 +22,11 @@ module Ohsnap
         include_flags = include_tables.map { |t| "-t #{t}" }.join(' ')
         flags = "-Fc -a #{include_flags}"
 
-        postgres.pg_dump(flags, dump_file_path, source_credentials)
+        postgres.pg_dump(flags, data_file_path, source_credentials)
       end
 
       def restore_data
-        postgres.pg_restore('-e -v --no-acl -O -a', dump_file_path, target_credentials)
+        postgres.pg_restore('-e -v --no-acl -O -a', data_file_path, target_credentials)
       end
     end
   end

@@ -105,8 +105,12 @@ module Ohsnap
           @target_appname ||= config.heroku_name(config.target_environment)
         end
 
-        def dump_file_path
-          @dump_file_path ||= File.join('tmp', 'ohsnap', "#{config.source_name}.dump")
+        def data_file_path
+          @data_file_path ||= File.join('tmp', 'ohsnap', "#{config.source_name}-data.dump")
+        end
+
+        def structure_file_path
+          @structure_file_path ||= File.join('tmp', 'ohsnap', "#{config.source_name}-structure.dump")
         end
 
         def fetch_heroku_credentials(appname)

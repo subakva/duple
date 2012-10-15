@@ -1,95 +1,104 @@
 require 'spec_helper'
 
 describe Ohsnap::CLI::Copy do
-  let(:runner) {
-    runner = fire_double('Ohsnap::Runner')
-    Ohsnap::Runner.stub(:new).and_return(runner)
-    runner
+  include Ohsnap::CLISpecHelpers
+
+  def invoke_copy(options = nil)
+    options ||= {}
+    options = { tables: ['categories'] }.merge(options)
+    invoke_cli(:copy, options)
+  end
+
+  before {
+    stub_fetch_config
+    stub_dump_data
+    stub_restore_data
   }
 
-  def stub_fetch_config
-    runner.stub(:capture).with(/heroku config/)
-      .and_return(File.read('spec/config/heroku.txt'))
-  end
-
-  def stub_dump_data
-    runner.stub(:run).with(/pg_dump/)
-  end
-
-  def stub_restore_data
-    runner.stub(:run).with(/pg_restore/)
-  end
-
-  def invoke_copy(source = nil, target = nil)
-    script = Ohsnap::CLI::Root.new
-    script.invoke(:copy, [], {
-      config: 'spec/config/simple.yml',
-      tables: ['categories'],
-      source: source,
-      target: target
-    })
-  end
-
   context 'from heroku to local' do
-    it 'fetches the source credentials' do
-      runner.should_receive(:capture)
-        .with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
-      stub_dump_data
-      stub_restore_data
+    let(:source) { 'stage' }
+    let(:target) { 'development' }
 
-      invoke_copy('stage', 'development')
+    it 'fetches the source credentials' do
+      runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
+        .and_return(File.read('spec/config/heroku.txt'))
+
+      invoke_copy
     end
 
-    it 'dowloads the tables from the source' do
-      stub_fetch_config
+    it 'dowloads the data from the source' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/stage.dump})
-      stub_restore_data
+        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/stage-data.dump})
 
-      invoke_copy('stage', 'development')
+      invoke_copy
     end
 
     it 'uploads the data to the target' do
-      stub_fetch_config
-      stub_dump_data
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d ohsnap_development < tmp/ohsnap/stage.dump})
+        .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d ohsnap_development < tmp/ohsnap/stage-data.dump})
 
-      invoke_copy('stage', 'development')
+      invoke_copy
     end
   end
 
   context 'from heroku to heroku' do
-    it 'fetches the target credentials' do
-      stub_fetch_config
-      runner.should_receive(:capture)
-        .with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
-      stub_dump_data
-      stub_restore_data
+    let(:source) { 'production' }
+    let(:target) { 'stage' }
 
-      invoke_copy('production', 'stage')
+    it 'fetches the source credentials' do
+      runner.should_receive(:capture).with("heroku config -a ohsnap-production")
+        .and_return(File.read('spec/config/heroku.txt'))
+
+      invoke_copy
+    end
+
+    it 'fetches the target credentials' do
+      runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
+        .and_return(File.read('spec/config/heroku.txt'))
+
+      invoke_copy
+    end
+
+    it 'dowloads the data from the source' do
+      runner.should_receive(:run)
+        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/production-data.dump})
+
+      invoke_copy
     end
 
     it 'uploads the data to the target' do
-      stub_fetch_config
-      stub_dump_data
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/production.dump})
+        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/production-data.dump})
 
-      invoke_copy('production', 'stage')
+      invoke_copy
     end
   end
 
   context 'from local to heroku' do
+    let(:source) { 'development' }
+    let(:target) { 'stage' }
+
+    it 'fetches the target credentials' do
+      runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
+        .and_return(File.read('spec/config/heroku.txt'))
+
+      invoke_copy
+    end
+
     it 'dumps the data from the local db' do
       stub_fetch_config
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="" pg_dump -Fc -a -t categories -h localhost -U postgres -p 5432 ohsnap_development > tmp/ohsnap/development.dump})
+        .with(%{PGPASSWORD="" pg_dump -Fc -a -t categories -h localhost -U postgres -p 5432 ohsnap_development > tmp/ohsnap/development-data.dump})
       stub_restore_data
 
-      invoke_copy('development', 'stage')
+      invoke_copy
+    end
+
+    it 'uploads the data to the target' do
+      runner.should_receive(:run)
+        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/development-data.dump})
+
+      invoke_copy
     end
   end
 
