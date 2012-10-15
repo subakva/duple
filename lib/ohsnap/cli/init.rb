@@ -4,8 +4,9 @@ module Ohsnap
       include Ohsnap::CLI::Helpers
 
       def create_sample_config
-        empty_directory(File.dirname(app_config_path))
-        copy_file('templates/config/ohsnap.yml', app_config_path)
+        config_path = app_config_path(false)
+        empty_directory(File.dirname(config_path))
+        copy_file('templates/config/ohsnap.yml', config_path)
       end
     end
   end

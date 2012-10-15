@@ -6,7 +6,7 @@ module Ohsnap
       desc 'print', 'Prints the current configuration.'
       def print
         require 'pp'
-        pp load_config
+        pp parse_config
       end
     end
   end

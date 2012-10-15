@@ -15,6 +15,13 @@ module Ohsnap
           File.expand_path(File.join(File.dirname(__FILE__), '../../..'))
         end
 
+        def config_option
+          class_option :config,
+            desc: 'The location of the config file.',
+            type: :string,
+            aliases: '-c'
+        end
+
         def source_option
           class_option :source,
             desc: 'The name of the source environment.',
@@ -39,36 +46,93 @@ module Ohsnap
         def capture_option
           class_option :capture,
             desc: 'Capture a new source snapshot before refreshing.',
-            type: :boolean,
-            aliases: '-c'
+            type: :boolean
         end
 
-        def tables_option
-          class_option :tables,
-            desc: 'A list of tables to include when dumping source data.',
-            type: :array,
-            aliases: '-t'
+        def tables_option(opts = nil)
+          opts ||= {}
+          opts = {
+            desc:     'A list of tables to include when dumping source data.',
+            required: false,
+            type:     :array,
+            aliases:  '-t'
+          }.merge(opts)
+          class_option :tables, opts
         end
       end
 
       module InstanceMethods
-        def app_config_path
+        def default_config_path
           File.join('config', 'ohsnap.yml')
         end
 
-        def default_target
-          'FAIL'
+        def app_config_path(verify_file = true)
+          config_path = options[:config] || default_config_path
+          if verify_file && !File.exists?(config_path)
+            raise ArgumentError.new("Missing config file: #{config_path}")
+          end
+          config_path
         end
 
-        def default_source
-          'FAIL'
+        def runner
+          @runner ||= Ohsnap::Runner.new
         end
 
-        def load_config
+        def postgres
+          @pg_runner ||= Ohsnap::PGRunner.new(runner)
+        end
+
+        def heroku
+          @heroku ||= Ohsnap::HerokuRunner.new(runner)
+        end
+
+        def source_appname
+          @source_appname ||= config.heroku_name(config.source_environment)
+        end
+
+        def target_appname
+          @target_appname ||= config.heroku_name(config.target_environment)
+        end
+
+        def dump_file_path
+          @dump_file_path ||= File.join('tmp', 'ohsnap', "#{config.source_name}.dump")
+        end
+
+        def fetch_heroku_credentials(appname)
+          config_vars = heroku.capture(appname, "config")
+
+          db_url = config_vars.split("\n").detect { |l| l =~ /DATABASE_URL/ }
+          raise ArgumentError.new("Missing DATABASE_URL variable for #{appname}") if db_url.nil?
+
+          db_url.match(/postgres:\/\/(?<user>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<db>.*)/)
+        end
+
+        def source_credentials
+          @source_credentials ||= if config.heroku?(config.source_environment)
+                                    fetch_heroku_credentials(source_appname)
+                                  else
+                                    config.local_credentials
+                                  end
+        end
+
+        def target_credentials
+          @target_credentials ||= if config.heroku?(config.target_environment)
+                                    fetch_heroku_credentials(target_appname)
+                                  else
+                                    config.local_credentials
+                                  end
+        end
+
+        def config
+          @config ||= parse_config
+        end
+
+        def parse_config
           config_path = File.join(destination_root, app_config_path)
           config_data = File.read(config_path)
           erbed = ERB.new(config_data).result
-          YAML.load(erbed) || {}
+          config_hash = YAML.load(erbed) || {}
+          Ohsnap::Configuration.new(config_hash, options)
         end
       end
     end
