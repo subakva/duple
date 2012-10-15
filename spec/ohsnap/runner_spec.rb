@@ -32,7 +32,7 @@ describe Ohsnap::Runner do
 
     it 'raises an error if the command fails' do
       expect {
-        runner.capture("cat NOT_A_REAL_FILE")
+        runner.capture("cat NOT_A_REAL_FILE > /dev/null 2>&1")
       }.to raise_error(RuntimeError, /Command failed: pid \d+ exit 1/)
     end
   end
