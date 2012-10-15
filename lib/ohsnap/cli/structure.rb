@@ -3,6 +3,7 @@ module Ohsnap
     class Structure < Thor::Group
       include Ohsnap::CLI::Helpers
 
+      config_option
       source_option
       target_option
 

@@ -51,6 +51,20 @@ module Ohsnap
       env['type'] == Ohsnap::Configuration::LOCAL
     end
 
+    def dry_run?
+      options[:dry_run]
+    end
+
+    def dry_run_credentials(envname)
+      {
+        user:     "[#{envname}.USER]",
+        password: "[#{envname}.PASS]",
+        host:     "[#{envname}.HOST]",
+        port:     "[#{envname}.PORT]",
+        db:       "[#{envname}.DB]"
+      }
+    end
+
     def local_credentials
       # TODO: Override these defaults from the config
       {
@@ -70,6 +84,40 @@ module Ohsnap
       env = environments[env_name]
       raise ArgumentError.new("Invalid environment: #{env_name}") if env.nil?
       env
+    end
+
+    def groups
+      raw_config['groups'] || {}
+    end
+
+    def group(group_name)
+      group = groups[group_name]
+      raise ArgumentError.new("Invalid group: #{group_name}") if group.nil?
+      group
+    end
+
+    def pre_refresh_tasks
+      raw_config['pre_refresh'] || {}
+    end
+
+    def pre_refresh_task(task_name)
+      task = pre_refresh_tasks[task_name]
+      raise ArgumentError.new("Invalid pre_refresh task: #{task_name}") if task.nil?
+      task
+    end
+
+    def post_refresh_tasks
+      raw_config['post_refresh'] || {}
+    end
+
+    def post_refresh_task(task_name)
+      task = post_refresh_tasks[task_name]
+      raise ArgumentError.new("Invalid post_refresh task: #{task_name}") if task.nil?
+      task
+    end
+
+    def other_options
+      raw_config.reject { |k,v| %w{environments groups pre_refresh post_refresh}.include?(k) }
     end
 
     protected

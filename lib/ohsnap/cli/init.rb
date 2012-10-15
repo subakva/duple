@@ -3,6 +3,8 @@ module Ohsnap
     class Init < Thor::Group
       include Ohsnap::CLI::Helpers
 
+      config_option
+
       def create_sample_config
         config_path = app_config_path(false)
         empty_directory(File.dirname(config_path))

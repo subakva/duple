@@ -49,6 +49,13 @@ module Ohsnap
             type: :boolean
         end
 
+        def dry_run_option
+          class_option :dry_run,
+            desc: 'Perform a dry run of the command. No data will be moved.',
+            type: :boolean,
+            aliases: '--dry-run'
+        end
+
         def tables_option(opts = nil)
           opts ||= {}
           opts = {
@@ -74,8 +81,12 @@ module Ohsnap
           config_path
         end
 
+        def dry_run?
+          options[:dry_run]
+        end
+
         def runner
-          @runner ||= Ohsnap::Runner.new
+          @runner ||= Ohsnap::Runner.new(dry_run: dry_run?)
         end
 
         def postgres
@@ -100,6 +111,8 @@ module Ohsnap
 
         def fetch_heroku_credentials(appname)
           config_vars = heroku.capture(appname, "config")
+
+          return config.dry_run_credentials(appname) if config.dry_run?
 
           db_url = config_vars.split("\n").detect { |l| l =~ /DATABASE_URL/ }
           raise ArgumentError.new("Missing DATABASE_URL variable for #{appname}") if db_url.nil?

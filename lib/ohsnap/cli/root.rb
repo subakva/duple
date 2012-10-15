@@ -15,8 +15,6 @@ module Ohsnap
     class Root < Thor
       include Ohsnap::CLI::Helpers
 
-      config_option
-
       # HACK Override register to handle class_options for groups properly.
       def self.register(klass, task_name, description)
         super(klass, task_name, task_name, description)
