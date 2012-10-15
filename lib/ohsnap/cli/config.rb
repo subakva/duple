@@ -9,7 +9,7 @@ module Ohsnap
         def print_hash(header, values)
           say header
           say '-' * 80
-          print_table values
+          print_table values, indent: 2
           say
         end
 
@@ -18,8 +18,8 @@ module Ohsnap
           say '-' * 80
           task_list.each do |task_name, commands|
             say
-            say task_name
-            print_table commands, indent: 2
+            say '  ' + task_name
+            print_table commands, indent: 4
           end
           say
         end
