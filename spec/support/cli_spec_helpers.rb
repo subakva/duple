@@ -12,9 +12,14 @@ module Ohsnap
       runner
     end
 
+    def stub_fetch_url
+      runner.stub(:capture).with(/heroku pgbackups:url/)
+        .and_return(File.read('spec/config/heroku_pgbackups_url.txt'))
+    end
+
     def stub_fetch_config
       runner.stub(:capture).with(/heroku config/)
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
     end
 
     def stub_dump_structure
@@ -27,6 +32,10 @@ module Ohsnap
 
     def stub_dump_data
       runner.stub(:run).with(/pg_dump .* -a /)
+    end
+
+    def stub_restore_url
+      runner.stub(:run).with(/heroku pgbackups:restore .* -a /)
     end
 
     def stub_restore_data

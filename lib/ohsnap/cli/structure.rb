@@ -12,12 +12,7 @@ module Ohsnap
       end
 
       def reset_target
-        if config.heroku?(config.target_environment)
-          heroku.run(target_appname, 'pg:reset')
-        else
-          # if yes?("Are you sure you want to reset the #{config.target_name} database?", :red)
-          runner.run('bundle exec rake db:drop db:create')
-        end
+        reset_database(config.target_environment)
       end
 
       def load_structure

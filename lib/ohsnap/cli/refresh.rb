@@ -10,7 +10,16 @@ module Ohsnap
       capture_option
       tables_option
 
-      def do_something
+      def fetch_snapshot_url
+        @source_snapshot_url = heroku.capture(source_appname, 'pgbackups:url').strip
+      end
+
+      def reset_target
+        reset_database(config.target_environment)
+      end
+
+      def restore_database
+        heroku.run(target_appname, "pgbackups:restore DATABASE #{@source_snapshot_url}")
       end
     end
   end

@@ -21,7 +21,7 @@ describe Ohsnap::CLI::Copy do
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_copy
     end
@@ -47,14 +47,14 @@ describe Ohsnap::CLI::Copy do
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-production")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_copy
     end
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_copy
     end
@@ -80,7 +80,7 @@ describe Ohsnap::CLI::Copy do
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_copy
     end

@@ -130,6 +130,16 @@ module Ohsnap
           )
         end
 
+        def reset_database(env)
+          if config.heroku?(env)
+            appname = config.heroku_name(env)
+            heroku.run(appname, 'pg:reset')
+          else
+            # if yes?("Are you sure you want to reset the #{config.target_name} database?", :red)
+            runner.run('bundle exec rake db:drop db:create')
+          end
+        end
+
         def source_credentials
           @source_credentials ||= if config.heroku?(config.source_environment)
                                     fetch_heroku_credentials(source_appname)

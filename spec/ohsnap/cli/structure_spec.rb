@@ -20,7 +20,7 @@ describe Ohsnap::CLI::Structure do
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_structure
     end
@@ -52,14 +52,14 @@ describe Ohsnap::CLI::Structure do
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-production")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_structure
     end
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_structure
     end
@@ -91,7 +91,7 @@ describe Ohsnap::CLI::Structure do
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku.txt'))
+        .and_return(File.read('spec/config/heroku_config.txt'))
 
       invoke_structure
     end
