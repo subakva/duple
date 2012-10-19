@@ -26,31 +26,31 @@ figure the application. Read and modify it, or clear it out and write your own.
 
     # Resets the stage database
     # Loads the latest production snapshot into the stage database
-    $ duple refresh production stage
+    $ duple refresh -s production -t stage
 
     # Downloads the latest full snapshot from production
     # Resets the development database
     # Loads the snapshot into the development database
-    $ duple refresh production development
+    $ duple refresh -s production -t development
 
     # Captures a new production database snapshot
     # Downloads the latest full snapshot from production
     # Resets the development database
     # Loads the snapshot into the development database
-    $ duple refresh production development --capture
+    $ duple refresh -s production -t development --capture
 
     # Downloads the schema and a subset of data from stage
     # Resets the backstage database
     # Loads the structure and the subset into the backstage database
-    $ duple refresh stage backstage --group minimal
+    $ duple refresh -s stage -t backstage --group minimal
 
     # Downloads the data from the specified tables from the stage database
     # Loads the data into the backstage database
-    $ duple copy stage backstage --tables products categories
+    $ duple copy -s stage -t backstage --tables products categories
 
 ## Future
 
-  * Everything.
+  * Pre- and post- refresh hooks
   * Support for skipping pre- and post- refresh steps.
   * Support for running pre- and post- refresh steps by themselves.
   * Support for other data stores.
