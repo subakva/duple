@@ -81,12 +81,8 @@ module Ohsnap
           config_path
         end
 
-        def dry_run?
-          options[:dry_run]
-        end
-
         def runner
-          @runner ||= Ohsnap::Runner.new(dry_run: dry_run?)
+          @runner ||= Ohsnap::Runner.new(dry_run: config.dry_run?)
         end
 
         def postgres
@@ -114,7 +110,13 @@ module Ohsnap
         end
 
         def structure_file_path
-          @structure_file_path ||= File.join(dump_dir_path, "#{config.source_name}-structure.dump")
+          filename = "#{config.source_name}-structure.dump"
+          @structure_file_path ||= File.join(dump_dir_path, filename)
+        end
+
+        def snapshot_file_path(timestamp)
+          filename = "#{config.source_name}-#{timestamp}.dump"
+          @structure_file_path ||= File.join(dump_dir_path, filename)
         end
 
         def fetch_heroku_credentials(appname)
@@ -130,6 +132,13 @@ module Ohsnap
           )
         end
 
+        def fetch_latest_snapshot_time(appname)
+          response = heroku.capture(appname, 'pgbackups')
+          last_line = response.split("\n").last
+          timestring = last_line.match(/\w+\s+(?<timestamp>[\d\s\/\:\.]+)\s+.*/)[:timestamp]
+          DateTime.strptime(timestring, '%Y/%m/%d %H:%M.%S')
+        end
+
         def reset_database(env)
           if config.heroku?(env)
             appname = config.heroku_name(env)
@@ -140,8 +149,18 @@ module Ohsnap
           end
         end
 
+        def dump_flags
+          include_tables = config.included_tables
+          include_flags = include_tables.map { |t| "-t #{t}" }
+
+          exclude_tables = config.excluded_tables
+          exclude_flags = exclude_tables.map { |t| "-T #{t}" }
+
+          flags = [ '-Fc -a', include_flags, exclude_flags ].flatten.compact.join(' ')
+        end
+
         def source_credentials
-          @source_credentials ||= if config.heroku?(config.source_environment)
+          @source_credentials ||= if config.heroku_source?
                                     fetch_heroku_credentials(source_appname)
                                   else
                                     config.local_credentials
@@ -149,7 +168,7 @@ module Ohsnap
         end
 
         def target_credentials
-          @target_credentials ||= if config.heroku?(config.target_environment)
+          @target_credentials ||= if config.heroku_target?
                                     fetch_heroku_credentials(target_appname)
                                   else
                                     config.local_credentials

@@ -7,20 +7,20 @@ describe Ohsnap::CLI::Structure do
     invoke_cli(:structure, options)
   end
 
-  before {
-    stub_fetch_config
-    stub_dump_structure
-    stub_reset_target
-    stub_restore_structure
-  }
-
   context 'from heroku to local' do
+    before {
+      stub_fetch_config
+      stub_dump_structure
+      stub_reset_local
+      stub_restore_structure
+    }
+
     let(:source) { 'stage' }
     let(:target) { 'development' }
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_structure
     end
@@ -47,19 +47,26 @@ describe Ohsnap::CLI::Structure do
   end
 
   context 'from heroku to heroku' do
+    before {
+      stub_fetch_config
+      stub_dump_structure
+      stub_reset_heroku
+      stub_restore_structure
+    }
+
     let(:source) { 'production' }
     let(:target) { 'stage' }
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-production")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_structure
     end
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_structure
     end
@@ -86,12 +93,19 @@ describe Ohsnap::CLI::Structure do
   end
 
   context 'from local to heroku' do
+    before {
+      stub_fetch_config
+      stub_dump_structure
+      stub_reset_heroku
+      stub_restore_structure
+    }
+
     let(:source) { 'development' }
     let(:target) { 'stage' }
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_structure
     end

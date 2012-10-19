@@ -1,4 +1,14 @@
 module Ohsnap
+
+  # Represents the configuration that will be used to perform the data
+  # operations.
+  #
+  # This class should be the only place in the system that knows about the
+  # structure of the config file.
+  #
+  # This class should not have any knowledge of any particular database
+  # system. For example, this class can know about the concept of a "tables",
+  # but it should know nothing about flags for PostgreSQL commands.
   class Configuration
     HEROKU  = 'heroku'
     LOCAL   = 'local'
@@ -27,6 +37,14 @@ module Ohsnap
       environment(target_name)
     end
 
+    def heroku_target?
+      heroku?(target_environment)
+    end
+
+    def local_target?
+      local?(source_target)
+    end
+
     def default_source_name
       env_names_by_flag('default_source', true).first
     end
@@ -39,20 +57,68 @@ module Ohsnap
       environment(source_name)
     end
 
-    def heroku?(env)
-      env['type'] == Ohsnap::Configuration::HEROKU
+    def heroku_source?
+      heroku?(source_environment)
     end
 
-    def heroku_name(env)
-      env['appname']
+    def local_source?
+      local?(source_environment)
+    end
+
+    def heroku?(env)
+      env['type'] == Ohsnap::Configuration::HEROKU
     end
 
     def local?(env)
       env['type'] == Ohsnap::Configuration::LOCAL
     end
 
+    def heroku_name(env)
+      env['appname']
+    end
+
     def dry_run?
       options[:dry_run]
+    end
+
+    def capture?
+      options[:capture]
+    end
+
+    def group_name
+      options[:group]
+    end
+
+    def table_names
+      options[:tables] || []
+    end
+
+    # Returns an array of tables to include, based on the group config and the
+    # --tables option. An empty array indicates that ALL tables should be
+    # included. If the group has the include_all flag, an empty array will be
+    # returned.
+    def included_tables
+      tables = table_names
+      if group_name
+        g = group(group_name)
+        return [] if g['include_all']
+        tables += (g['include_tables'] || [])
+      end
+      tables.uniq.sort
+    end
+
+    # Returns an array of tables to exclude, based on the group config and the
+    # --tables option. The --tables option takes precedence over the --group
+    # option, so if a table is excluded from a group, but specified in the
+    # --tables option the table will NOT be excluded.
+     def excluded_tables
+      tables = []
+      if group_name
+        g = group(group_name)
+        tables += (g['exclude_tables'] || [])
+      end
+      tables -= table_names
+      tables
     end
 
     def dry_run_credentials(envname)

@@ -1,6 +1,106 @@
 require 'spec_helper'
 
 describe Ohsnap::Configuration do
+
+  describe '#excluded_tables' do
+    let(:config_hash) { YAML.load(File.read('spec/config/groups.yml'))}
+
+    context 'with neither tables nor group options' do
+      it 'returns an empty array' do
+        config = Ohsnap::Configuration.new(config_hash, {})
+        config.excluded_tables.should == []
+      end
+    end
+
+    context 'with the group option' do
+      it 'returns the tables specified by the group' do
+        config = Ohsnap::Configuration.new(config_hash, {group: 'no_comments'})
+        config.excluded_tables.should == ['comments']
+      end
+
+      context 'with an include_all group' do
+        it 'returns the tables specified by the group' do
+          config = Ohsnap::Configuration.new(config_hash, {group: 'all_but_comments'})
+          config.excluded_tables.should == ['comments']
+        end
+      end
+    end
+
+    context 'with both tables and group options' do
+      it 'does not exclude tables in the tables option' do
+        config = Ohsnap::Configuration.new(config_hash, {
+          group: 'no_comments',
+          tables: ['comments']
+        })
+        config.included_tables.should == ['comments']
+        config.excluded_tables.should == []
+      end
+
+      context 'with an include_all group' do
+        it 'does not exclude tables in the tables option' do
+          config = Ohsnap::Configuration.new(config_hash, {
+            group: 'all_but_comments',
+            tables: ['comments']
+          })
+          config.included_tables.should == []
+          config.excluded_tables.should == []
+        end
+      end
+    end
+  end
+
+  describe '#included_tables' do
+    let(:config_hash) { YAML.load(File.read('spec/config/groups.yml'))}
+
+    context 'with neither tables nor group options' do
+      it 'returns an empty array' do
+        config = Ohsnap::Configuration.new(config_hash, {})
+        config.included_tables.should == []
+      end
+    end
+
+    context 'with the tables option' do
+      it 'returns the tables specified in the option value' do
+        config = Ohsnap::Configuration.new(config_hash, {tables: ['categories']})
+        config.included_tables.should == ['categories']
+      end
+    end
+
+    context 'with the group option' do
+      it 'returns the tables specified by the group' do
+        config = Ohsnap::Configuration.new(config_hash, {group: 'minimal'})
+        config.included_tables.should == ['categories', 'links']
+      end
+
+      context 'with an include_all group' do
+        it 'returns an empty array' do
+          config = Ohsnap::Configuration.new(config_hash, {group: 'all'})
+          config.included_tables.should == []
+        end
+      end
+    end
+
+    context 'with both tables and group options' do
+      it 'returns all tables in the group and the option value' do
+        config = Ohsnap::Configuration.new(config_hash, {
+          group: 'minimal',
+          tables: ['posts', 'comments']
+        })
+        config.included_tables.should == ['categories', 'comments', 'links', 'posts']
+      end
+
+      context 'with an include_all group' do
+        it 'returns an empty array' do
+          config = Ohsnap::Configuration.new(config_hash, {
+            group: 'all',
+            tables: ['posts', 'comments']
+          })
+          config.included_tables.should == []
+        end
+      end
+    end
+  end
+
   describe '#source_environment' do
     let(:config_hash) { YAML.load(File.read('spec/config/simple.yml'))}
 

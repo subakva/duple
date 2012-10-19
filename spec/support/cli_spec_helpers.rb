@@ -4,6 +4,7 @@ module Ohsnap
       base.send(:let, :runner) { double_runner }
       base.send(:let, :source) { 'stage' }
       base.send(:let, :target) { 'development' }
+      base.send(:let, :snapshot_path) { 'tmp/ohsnap/stage-2012-10-19-03-09-30.dump' }
     end
 
     def double_runner
@@ -12,14 +13,35 @@ module Ohsnap
       runner
     end
 
+    def heroku_pgbackups_url_response
+      File.read('spec/config/heroku_pgbackups_url.txt')
+    end
+
+    def heroku_pgbackups_response
+      File.read('spec/config/heroku_pgbackups.txt')
+    end
+
+    def heroku_config_response
+      File.read('spec/config/heroku_config.txt')
+    end
+
     def stub_fetch_url
       runner.stub(:capture).with(/heroku pgbackups:url/)
-        .and_return(File.read('spec/config/heroku_pgbackups_url.txt'))
+        .and_return(heroku_pgbackups_url_response)
     end
 
     def stub_fetch_config
       runner.stub(:capture).with(/heroku config/)
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
+    end
+
+    def stub_fetch_backups
+      runner.stub(:capture).with(/heroku pgbackups /)
+        .and_return(heroku_pgbackups_response)
+    end
+
+    def stub_download_snapshot
+      runner.stub(:run).with(/curl/)
     end
 
     def stub_dump_structure
@@ -42,9 +64,12 @@ module Ohsnap
       runner.stub(:run).with(/pg_restore .* -a /)
     end
 
-    def stub_reset_target
-      runner.stub(:run).with(/bundle exec rake db:drop db:create/)
+    def stub_reset_heroku
       runner.stub(:run).with(/heroku pg:reset/)
+    end
+
+    def stub_reset_local
+      runner.stub(:run).with(/bundle exec rake db:drop db:create/)
     end
 
     def invoke_cli(command, options = nil)

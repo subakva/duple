@@ -15,13 +15,21 @@ describe Ohsnap::CLI::Copy do
     stub_restore_data
   }
 
+  context 'with neither tables nor group option' do
+    it 'fetches the source credentials' do
+      expect {
+        invoke_copy(tables: nil)
+      }.to raise_error(ArgumentError, 'One of --group or --tables options is required.')
+    end
+  end
+
   context 'from heroku to local' do
     let(:source) { 'stage' }
     let(:target) { 'development' }
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_copy
     end
@@ -47,14 +55,14 @@ describe Ohsnap::CLI::Copy do
 
     it 'fetches the source credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-production")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_copy
     end
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_copy
     end
@@ -80,7 +88,7 @@ describe Ohsnap::CLI::Copy do
 
     it 'fetches the target credentials' do
       runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
-        .and_return(File.read('spec/config/heroku_config.txt'))
+        .and_return(heroku_config_response)
 
       invoke_copy
     end
@@ -100,9 +108,5 @@ describe Ohsnap::CLI::Copy do
 
       invoke_copy
     end
-  end
-
-  context 'with a group' do
-    it 'downloads only the tables in the group'
   end
 end
