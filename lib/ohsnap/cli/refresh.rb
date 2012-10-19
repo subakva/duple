@@ -10,20 +10,38 @@ module Ohsnap
       capture_option
       tables_option
 
+      no_tasks do
+        def capture_snapshot?
+          config.capture? && config.heroku_source?
+        end
+
+        def fetch_snapshot_url?
+          config.heroku_source? && !config.filtered_tables?
+        end
+
+        def download_snapshot?
+          config.heroku_source? && config.local_target? && !config.filtered_tables?
+        end
+
+        def dump_data?
+          config.local_source? || config.filtered_tables?
+        end
+      end
+
       def capture_snapshot
-        return unless config.capture? && config.heroku_source?
+        return unless capture_snapshot?
 
         heroku.run(source_appname, 'pgbackups:capture')
       end
 
       def fetch_snapshot_url
-        return if config.local_source?
+        return unless fetch_snapshot_url?
 
         @source_snapshot_url = heroku.capture(source_appname, 'pgbackups:url').strip
       end
 
       def download_snapshot
-        return if config.local_source? || config.heroku_target?
+        return unless download_snapshot?
 
         timestamp = fetch_latest_snapshot_time(source_appname)
 
@@ -34,7 +52,7 @@ module Ohsnap
       end
 
       def dump_data
-        return if config.heroku_source?
+        return unless dump_data?
 
         postgres.pg_dump(dump_flags, data_file_path, source_credentials)
       end
@@ -44,12 +62,12 @@ module Ohsnap
       end
 
       def restore_database
-        if config.heroku_target? && config.heroku_source?
-          heroku.run(target_appname, "pgbackups:restore DATABASE #{@source_snapshot_url}")
-        elsif config.heroku_source?
+        if download_snapshot?
           postgres.pg_restore('-e -v --no-acl -O -a', @snapshot_path, target_credentials)
-        else
+        elsif dump_data?
           postgres.pg_restore('-e -v --no-acl -O -a', data_file_path, target_credentials)
+        else
+          heroku.run(target_appname, "pgbackups:restore DATABASE #{@source_snapshot_url}")
         end
       end
     end

@@ -42,7 +42,7 @@ module Ohsnap
     end
 
     def local_target?
-      local?(source_target)
+      local?(target_environment)
     end
 
     def default_source_name
@@ -91,6 +91,10 @@ module Ohsnap
 
     def table_names
       options[:tables] || []
+    end
+
+    def filtered_tables?
+      included_tables.size > 0 || excluded_tables.size > 0
     end
 
     # Returns an array of tables to include, based on the group config and the
