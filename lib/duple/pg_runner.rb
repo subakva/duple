@@ -1,4 +1,4 @@
-module Ohsnap
+module Duple
   class PGRunner
     def initialize(runner)
       @runner = runner

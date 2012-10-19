@@ -2,7 +2,7 @@ lib_path = File.expand_path('../../lib', __FILE__)
 $:.unshift(lib_path)
 
 require 'simplecov'
-require 'ohsnap'
+require 'duple'
 Dir['spec/support/**/*.rb'].each { |f| require File.expand_path(f) }
 
 RSpec.configure do |config|

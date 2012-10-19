@@ -1,7 +1,7 @@
-module Ohsnap
+module Duple
   module CLI
     class Copy < Thor::Group
-      include Ohsnap::CLI::Helpers
+      include Duple::CLI::Helpers
 
       config_option
       source_option

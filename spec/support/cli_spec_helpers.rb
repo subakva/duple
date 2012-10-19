@@ -1,15 +1,15 @@
-module Ohsnap
+module Duple
   module CLISpecHelpers
     def self.included(base)
       base.send(:let, :runner) { double_runner }
       base.send(:let, :source) { 'stage' }
       base.send(:let, :target) { 'development' }
-      base.send(:let, :snapshot_path) { 'tmp/ohsnap/stage-2012-10-19-03-09-30.dump' }
+      base.send(:let, :snapshot_path) { 'tmp/duple/stage-2012-10-19-03-09-30.dump' }
     end
 
     def double_runner
-      runner = fire_double('Ohsnap::Runner')
-      Ohsnap::Runner.stub(:new).and_return(runner)
+      runner = fire_double('Duple::Runner')
+      Duple::Runner.stub(:new).and_return(runner)
       runner
     end
 
@@ -74,7 +74,7 @@ module Ohsnap
 
     def invoke_cli(command, options = nil)
       options ||= {}
-      script = Ohsnap::CLI::Root.new
+      script = Duple::CLI::Root.new
       script.invoke(command, [], {
         config: 'spec/config/simple.yml',
         source: source,

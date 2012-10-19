@@ -1,6 +1,6 @@
 require 'fileutils'
 
-module Ohsnap
+module Duple
   class Runner
 
     def initialize(options = nil)

@@ -7,5 +7,5 @@ if File.exists?(File.join(File.expand_path('../..', __FILE__), '.git'))
   $:.unshift(lib_path)
 end
 
-require "ohsnap"
-Ohsnap::CLI::Root.start
+require 'duple'
+Duple::CLI::Root.start

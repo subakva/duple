@@ -1,4 +1,4 @@
-module Ohsnap
+module Duple
   class HerokuRunner
     def initialize(runner)
       @runner = runner

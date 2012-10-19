@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe Ohsnap::CLI::Refresh do
-  include Ohsnap::CLISpecHelpers
+describe Duple::CLI::Refresh do
+  include Duple::CLISpecHelpers
 
   def invoke_refresh(options = nil)
     invoke_cli(:refresh, options)
   end
 
-  before { FileUtils.mkdir_p('tmp/ohsnap') }
-  after { FileUtils.rm_rf('tmp/ohsnap') }
+  before { FileUtils.mkdir_p('tmp/duple') }
+  after { FileUtils.rm_rf('tmp/duple') }
 
   context 'from heroku to heroku' do
     before {
@@ -30,14 +30,14 @@ describe Ohsnap::CLI::Refresh do
     end
 
     it 'fetches the latest snapshot URL for the source' do
-      runner.should_receive(:capture).with('heroku pgbackups:url -a ohsnap-production')
+      runner.should_receive(:capture).with('heroku pgbackups:url -a duple-production')
         .and_return(heroku_pgbackups_url_response)
 
       invoke_refresh
     end
 
     it 'resets the target database' do
-      runner.should_receive(:run).with(%{heroku pg:reset -a ohsnap-stage})
+      runner.should_receive(:run).with(%{heroku pg:reset -a duple-stage})
 
       invoke_refresh
     end
@@ -50,7 +50,7 @@ describe Ohsnap::CLI::Refresh do
 
     it 'restores the target from the snapshot URL' do
       db_url = heroku_pgbackups_url_response.strip
-      runner.should_receive(:run).with(%{heroku pgbackups:restore DATABASE #{db_url} -a ohsnap-stage})
+      runner.should_receive(:run).with(%{heroku pgbackups:restore DATABASE #{db_url} -a duple-stage})
 
       invoke_refresh
     end
@@ -62,7 +62,7 @@ describe Ohsnap::CLI::Refresh do
 
     context 'with the --capture flag' do
       it 'captures a new snapshot before fetching the URL' do
-        runner.should_receive(:run).with('heroku pgbackups:capture -a ohsnap-production')
+        runner.should_receive(:run).with('heroku pgbackups:capture -a duple-production')
         invoke_refresh(capture: true)
       end
     end
@@ -79,10 +79,10 @@ describe Ohsnap::CLI::Refresh do
         runner.should_not_receive(:run).with(/heroku pgbackups:restore/)
 
         runner.should_receive(:run).once.ordered.with(/heroku pgbackups:capture/)
-        runner.should_receive(:capture).once.ordered.with(/heroku config -a ohsnap-production/).and_return(heroku_config_response)
+        runner.should_receive(:capture).once.ordered.with(/heroku config -a duple-production/).and_return(heroku_config_response)
         runner.should_receive(:run).once.ordered.with(/pg_dump/).and_return(heroku_config_response)
         runner.should_receive(:run).once.ordered.with(/heroku pg:reset/)
-        runner.should_receive(:capture).once.ordered.with(/heroku config -a ohsnap-stage/).and_return(heroku_config_response)
+        runner.should_receive(:capture).once.ordered.with(/heroku config -a duple-stage/).and_return(heroku_config_response)
         runner.should_receive(:run).once.ordered.with(/pg_restore/)
 
         invoke_refresh(capture: true, tables: ['categories'])
@@ -97,14 +97,14 @@ describe Ohsnap::CLI::Refresh do
 
       it 'dumps the tables in the list' do
         runner.should_receive(:run)
-          .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/production-data.dump})
+          .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/duple/production-data.dump})
 
         invoke_refresh(tables: ['categories'])
       end
 
       it 'loads the dump file into the target database' do
         runner.should_receive(:run)
-          .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/production-data.dump})
+          .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/duple/production-data.dump})
 
         invoke_refresh(tables: ['categories'])
       end
@@ -135,7 +135,7 @@ describe Ohsnap::CLI::Refresh do
     end
 
     it 'fetches the latest snapshot URL for the source' do
-      runner.should_receive(:capture).with('heroku pgbackups:url -a ohsnap-stage')
+      runner.should_receive(:capture).with('heroku pgbackups:url -a duple-stage')
         .and_return(heroku_pgbackups_url_response)
 
       invoke_refresh
@@ -169,7 +169,7 @@ describe Ohsnap::CLI::Refresh do
 
     it 'loads the snapshot file into the local database' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d ohsnap_development < #{snapshot_path}})
+        .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d duple_development < #{snapshot_path}})
 
       invoke_refresh
     end
@@ -181,7 +181,7 @@ describe Ohsnap::CLI::Refresh do
 
     context 'with the --capture flag' do
       it 'captures a new snapshot before fetching the URL' do
-        runner.should_receive(:run).with('heroku pgbackups:capture -a ohsnap-stage')
+        runner.should_receive(:run).with('heroku pgbackups:capture -a duple-stage')
         invoke_refresh(capture: true)
       end
     end
@@ -197,7 +197,7 @@ describe Ohsnap::CLI::Refresh do
 
       it 'runs commands in the correct order' do
         runner.should_receive(:run).once.ordered.with(/heroku pgbackups:capture/)
-        runner.should_receive(:capture).once.ordered.with(/heroku config -a ohsnap-stage/).and_return(heroku_config_response)
+        runner.should_receive(:capture).once.ordered.with(/heroku config -a duple-stage/).and_return(heroku_config_response)
         runner.should_receive(:run).once.ordered.with(/pg_dump/)
         runner.should_receive(:run).once.ordered.with(/rake db:drop db:create/)
         runner.should_receive(:run).once.ordered.with(/pg_restore/)
@@ -214,14 +214,14 @@ describe Ohsnap::CLI::Refresh do
 
       it 'dumps the tables in the list' do
         runner.should_receive(:run)
-          .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/stage-data.dump})
+          .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/duple/stage-data.dump})
 
         invoke_refresh(table_options)
       end
 
       it 'loads the dump file into the target database' do
         runner.should_receive(:run)
-          .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d ohsnap_development < tmp/ohsnap/stage-data.dump})
+          .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d duple_development < tmp/duple/stage-data.dump})
 
         invoke_refresh(table_options)
       end
@@ -242,7 +242,7 @@ describe Ohsnap::CLI::Refresh do
     it 'runs commands in the correct order' do
       runner.should_receive(:run).once.ordered.with(/pg_dump/)
       runner.should_receive(:run).once.ordered.with(/heroku pg:reset/)
-      runner.should_receive(:capture).once.ordered.with(/heroku config -a ohsnap-stage/).and_return(heroku_config_response)
+      runner.should_receive(:capture).once.ordered.with(/heroku config -a duple-stage/).and_return(heroku_config_response)
       runner.should_receive(:run).once.ordered.with(/pg_restore/)
 
       invoke_refresh(capture: true)
@@ -250,20 +250,20 @@ describe Ohsnap::CLI::Refresh do
 
     it 'dumps the data from the local database' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="" pg_dump -Fc -a -h localhost -U postgres -p 5432 ohsnap_development > tmp/ohsnap/development-data.dump})
+        .with(%{PGPASSWORD="" pg_dump -Fc -a -h localhost -U postgres -p 5432 duple_development > tmp/duple/development-data.dump})
 
       invoke_refresh
     end
 
     it 'resets the target database' do
-      runner.should_receive(:run).with(%{heroku pg:reset -a ohsnap-stage})
+      runner.should_receive(:run).with(%{heroku pg:reset -a duple-stage})
 
       invoke_refresh
     end
 
     it 'restores the target from the dump' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/development-data.dump})
+        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/duple/development-data.dump})
 
       invoke_refresh
     end
@@ -285,7 +285,7 @@ describe Ohsnap::CLI::Refresh do
     context 'with a table list' do
       it 'downloads only the tables in the list' do
         runner.should_receive(:run)
-          .with(%{PGPASSWORD="" pg_dump -Fc -a -t categories -h localhost -U postgres -p 5432 ohsnap_development > tmp/ohsnap/development-data.dump})
+          .with(%{PGPASSWORD="" pg_dump -Fc -a -t categories -h localhost -U postgres -p 5432 duple_development > tmp/duple/development-data.dump})
 
         invoke_refresh(tables: ['categories'])
       end
@@ -312,16 +312,16 @@ describe Ohsnap::CLI::Refresh do
     let(:task_options) { { config: 'spec/config/tasks.yml' } }
 
     it 'executes the tasks before refreshing' do
-      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a ohsnap-stage')
+      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
       runner.should_receive(:run).any_number_of_times.ordered.with(/heroku pgbackups/)
 
       invoke_refresh(table_options.merge(capture: true))
     end
 
     it 'executes the tasks in order' do
-      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a ohsnap-production')
-      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a ohsnap-stage')
-      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a ohsnap-stage')
+      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a duple-production')
+      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
+      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a duple-stage')
 
       invoke_refresh(task_options)
     end
@@ -330,7 +330,7 @@ describe Ohsnap::CLI::Refresh do
       let(:target) { 'development' }
 
       it 'executes the tasks in order' do
-        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a ohsnap-production')
+        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a duple-production')
         runner.should_not_receive(:run).with(/heroku maintenance:on/)
         runner.should_receive(:run).once.ordered.with('rake refresh:prepare')
 
@@ -343,8 +343,8 @@ describe Ohsnap::CLI::Refresh do
 
       it 'executes the tasks in order' do
         runner.should_receive(:run).once.ordered.with('rake refresh:prepare')
-        runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a ohsnap-stage')
-        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a ohsnap-stage')
+        runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
+        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:prepare" -a duple-stage')
 
         invoke_refresh(task_options)
       end
@@ -371,15 +371,15 @@ describe Ohsnap::CLI::Refresh do
 
     it 'executes the tasks after refreshing' do
       runner.should_receive(:run).any_number_of_times.ordered.with(/heroku pgbackups/)
-      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a ohsnap-stage')
+      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
 
       invoke_refresh(table_options.merge(capture: true))
     end
 
     it 'executes the tasks in order' do
-      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a ohsnap-production')
-      runner.should_receive(:run).once.ordered.with('heroku maintenance:off -a ohsnap-stage')
-      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a ohsnap-stage')
+      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a duple-production')
+      runner.should_receive(:run).once.ordered.with('heroku maintenance:off -a duple-stage')
+      runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a duple-stage')
 
       invoke_refresh(task_options)
     end
@@ -388,7 +388,7 @@ describe Ohsnap::CLI::Refresh do
       let(:target) { 'development' }
 
       it 'executes the tasks in order' do
-        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a ohsnap-production')
+        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a duple-production')
         runner.should_not_receive(:run).with(/heroku maintenance:off/)
         runner.should_receive(:run).once.ordered.with('rake refresh:finish')
 
@@ -401,8 +401,8 @@ describe Ohsnap::CLI::Refresh do
 
       it 'executes the tasks in order' do
         runner.should_receive(:run).once.ordered.with('rake refresh:finish')
-        runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a ohsnap-stage')
-        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a ohsnap-stage')
+        runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
+        runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a duple-stage')
 
         invoke_refresh(task_options)
       end

@@ -10,5 +10,5 @@ SimpleCov.formatter = SimpleCov::Formatter::QualityFormatter
 
 SimpleCov.start do
   add_filter '/spec/'
-  add_group 'CLI', 'lib/ohsnap/cli'
+  add_group 'CLI', 'lib/duple/cli'
 end

@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in ohsnap.gemspec
+# Specify your gem's dependencies in duple.gemspec
 gemspec

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'fileutils'
 
-describe Ohsnap::Runner do
+describe Duple::Runner do
 
   let(:test_dir) { 'tmp' }
   let(:test_file) { "#{test_dir}/spawnbag.txt" }
@@ -12,7 +12,7 @@ describe Ohsnap::Runner do
   after { FileUtils.rm(test_file) if File.exists?(test_file) }
 
   context 'in live mode' do
-    let(:runner) { Ohsnap::Runner.new(log: log) }
+    let(:runner) { Duple::Runner.new(log: log) }
 
     it 'executes a command' do
       runner.run("touch #{test_file}")
@@ -38,7 +38,7 @@ describe Ohsnap::Runner do
   end
 
   context 'in dry run mode' do
-    let(:runner) { Ohsnap::Runner.new(dry_run: true, log: log) }
+    let(:runner) { Duple::Runner.new(dry_run: true, log: log) }
 
     it 'does not actually run the commands' do
       runner.run("touch #{test_file}")
@@ -54,7 +54,7 @@ describe Ohsnap::Runner do
 
   context 'with a recorder' do
     let(:recorder) { StringIO.new }
-    let(:runner) { Ohsnap::Runner.new(recorder: recorder, log: log) }
+    let(:runner) { Duple::Runner.new(recorder: recorder, log: log) }
 
     it 'logs commands to a file' do
       runner.capture('ls tmp')

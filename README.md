@@ -1,7 +1,7 @@
-# Ohsnap
+# Duple
 
-Ohsnap makes it easy to move PostgreSQL data around between your deployment
-environments. Ohsnap knows how to move data from one heroku environment to
+Duple makes it easy to move PostgreSQL data around between your deployment
+environments. Duple knows how to move data from one heroku environment to
 another and how to load it into your local database. It can execute rake or
 Heroku commands before and after your loading data into your target
 environment. This is great for scrubbing, replacing, trimming or generating
@@ -11,11 +11,11 @@ data for your test environments.
 
 Install the gem:
 
-    $ gem install ohsnap
+    $ gem install duple
 
 Generate a config file:
 
-    $ ohsnap init
+    $ duple init
 
 ## Configuration
 
@@ -26,27 +26,27 @@ figure the application. Read and modify it, or clear it out and write your own.
 
     # Resets the stage database
     # Loads the latest production snapshot into the stage database
-    $ ohsnap refresh production stage
+    $ duple refresh production stage
 
     # Downloads the latest full snapshot from production
     # Resets the development database
     # Loads the snapshot into the development database
-    $ ohsnap refresh production development
+    $ duple refresh production development
 
     # Captures a new production database snapshot
     # Downloads the latest full snapshot from production
     # Resets the development database
     # Loads the snapshot into the development database
-    $ ohsnap refresh production development --capture
+    $ duple refresh production development --capture
 
     # Downloads the schema and a subset of data from stage
     # Resets the backstage database
     # Loads the structure and the subset into the backstage database
-    $ ohsnap refresh stage backstage --group minimal
+    $ duple refresh stage backstage --group minimal
 
     # Downloads the data from the specified tables from the stage database
     # Loads the data into the backstage database
-    $ ohsnap copy stage backstage --tables products categories
+    $ duple copy stage backstage --tables products categories
 
 ## Future
 

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Ohsnap::CLI::Config do
+describe Duple::CLI::Config do
   it 'prints the configuration' do
     result = capture_stdout do
-      script = Ohsnap::CLI::Config.new
+      script = Duple::CLI::Config.new
       script.invoke(:all, [], {})
     end
 

@@ -1,7 +1,7 @@
-module Ohsnap
+module Duple
   module CLI
     class Config < Thor
-      include Ohsnap::CLI::Helpers
+      include Duple::CLI::Helpers
 
       config_option
 

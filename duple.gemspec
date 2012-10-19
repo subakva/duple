@@ -1,19 +1,19 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'ohsnap/version'
+require 'duple/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = 'ohsnap'
-  gem.version       = Ohsnap::VERSION
+  gem.name          = 'duple'
+  gem.version       = Duple::VERSION
   gem.authors       = ['Jason Wadsworth']
   gem.email         = ['jdwadsworth@gmail.com']
   gem.description   = %q{
-    Ohsnap simplifies moving and processing data snapshots between development,
+    Duple simplifies moving and processing data snapshots between development,
     testing and production environements.
   }
   gem.summary       = %q{Moves PostgreSQL data from here to there.}
-  gem.homepage      = 'https://github.com/subakva/ohsnap'
+  gem.homepage      = 'https://github.com/subakva/duple'
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

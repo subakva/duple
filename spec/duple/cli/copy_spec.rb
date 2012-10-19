@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Ohsnap::CLI::Copy do
-  include Ohsnap::CLISpecHelpers
+describe Duple::CLI::Copy do
+  include Duple::CLISpecHelpers
 
   def invoke_copy(options = nil)
     options ||= {}
@@ -28,7 +28,7 @@ describe Ohsnap::CLI::Copy do
     let(:target) { 'development' }
 
     it 'fetches the source credentials' do
-      runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
+      runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
       invoke_copy
@@ -36,14 +36,14 @@ describe Ohsnap::CLI::Copy do
 
     it 'dowloads the data from the source' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/stage-data.dump})
+        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/duple/stage-data.dump})
 
       invoke_copy
     end
 
     it 'uploads the data to the target' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d ohsnap_development < tmp/ohsnap/stage-data.dump})
+        .with(%{PGPASSWORD="" pg_restore -e -v --no-acl -O -a -h localhost -U postgres -p 5432 -d duple_development < tmp/duple/stage-data.dump})
 
       invoke_copy
     end
@@ -54,14 +54,14 @@ describe Ohsnap::CLI::Copy do
     let(:target) { 'stage' }
 
     it 'fetches the source credentials' do
-      runner.should_receive(:capture).with("heroku config -a ohsnap-production")
+      runner.should_receive(:capture).with("heroku config -a duple-production")
         .and_return(heroku_config_response)
 
       invoke_copy
     end
 
     it 'fetches the target credentials' do
-      runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
+      runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
       invoke_copy
@@ -69,14 +69,14 @@ describe Ohsnap::CLI::Copy do
 
     it 'dowloads the data from the source' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/ohsnap/production-data.dump})
+        .with(%{PGPASSWORD="pg-pass" pg_dump -Fc -a -t categories -h pg-host -U pg-user -p 6022 pg-db > tmp/duple/production-data.dump})
 
       invoke_copy
     end
 
     it 'uploads the data to the target' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/production-data.dump})
+        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/duple/production-data.dump})
 
       invoke_copy
     end
@@ -87,7 +87,7 @@ describe Ohsnap::CLI::Copy do
     let(:target) { 'stage' }
 
     it 'fetches the target credentials' do
-      runner.should_receive(:capture).with("heroku config -a ohsnap-stage")
+      runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
       invoke_copy
@@ -96,7 +96,7 @@ describe Ohsnap::CLI::Copy do
     it 'dumps the data from the local db' do
       stub_fetch_config
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="" pg_dump -Fc -a -t categories -h localhost -U postgres -p 5432 ohsnap_development > tmp/ohsnap/development-data.dump})
+        .with(%{PGPASSWORD="" pg_dump -Fc -a -t categories -h localhost -U postgres -p 5432 duple_development > tmp/duple/development-data.dump})
       stub_restore_data
 
       invoke_copy
@@ -104,7 +104,7 @@ describe Ohsnap::CLI::Copy do
 
     it 'uploads the data to the target' do
       runner.should_receive(:run)
-        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/ohsnap/development-data.dump})
+        .with(%{PGPASSWORD="pg-pass" pg_restore -e -v --no-acl -O -a -h pg-host -U pg-user -p 6022 -d pg-db < tmp/duple/development-data.dump})
 
       invoke_copy
     end

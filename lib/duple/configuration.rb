@@ -1,4 +1,4 @@
-module Ohsnap
+module Duple
 
   # Represents the configuration that will be used to perform the data
   # operations.
@@ -66,11 +66,11 @@ module Ohsnap
     end
 
     def heroku?(env)
-      env['type'] == Ohsnap::Configuration::HEROKU
+      env['type'] == Duple::Configuration::HEROKU
     end
 
     def local?(env)
-      env['type'] == Ohsnap::Configuration::LOCAL
+      env['type'] == Duple::Configuration::LOCAL
     end
 
     def heroku_name(env)
@@ -142,7 +142,7 @@ module Ohsnap
         password: '',
         host:     'localhost',
         port:     '5432',
-        db:       'ohsnap_development'
+        db:       'duple_development'
       }
     end
 

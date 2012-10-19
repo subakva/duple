@@ -1,4 +1,4 @@
-module Ohsnap
+module Duple
   module IOSpecHelpers
     def suppress_output
       @original_stdout, $stdout = $stdout, StringIO.new
@@ -29,5 +29,5 @@ module Ohsnap
 end
 
 RSpec.configure do |config|
-  config.include Ohsnap::IOSpecHelpers
+  config.include Duple::IOSpecHelpers
 end

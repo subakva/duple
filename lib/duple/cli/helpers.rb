@@ -1,6 +1,6 @@
 require 'yaml'
 
-module Ohsnap
+module Duple
   module CLI
     module Helpers
 
@@ -70,7 +70,7 @@ module Ohsnap
 
       module InstanceMethods
         def default_config_path
-          File.join('config', 'ohsnap.yml')
+          File.join('config', 'duple.yml')
         end
 
         def app_config_path(verify_file = true)
@@ -82,15 +82,15 @@ module Ohsnap
         end
 
         def runner
-          @runner ||= Ohsnap::Runner.new(dry_run: config.dry_run?)
+          @runner ||= Duple::Runner.new(dry_run: config.dry_run?)
         end
 
         def postgres
-          @pg_runner ||= Ohsnap::PGRunner.new(runner)
+          @pg_runner ||= Duple::PGRunner.new(runner)
         end
 
         def heroku
-          @heroku ||= Ohsnap::HerokuRunner.new(runner)
+          @heroku ||= Duple::HerokuRunner.new(runner)
         end
 
         def source_appname
@@ -102,7 +102,7 @@ module Ohsnap
         end
 
         def dump_dir_path
-          File.join('tmp', 'ohsnap')
+          File.join('tmp', 'duple')
         end
 
         def data_file_path
@@ -184,7 +184,7 @@ module Ohsnap
           config_data = File.read(config_path)
           erbed = ERB.new(config_data).result
           config_hash = YAML.load(erbed) || {}
-          Ohsnap::Configuration.new(config_hash, options)
+          Duple::Configuration.new(config_hash, options)
         end
       end
     end
