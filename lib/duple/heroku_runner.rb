@@ -1,4 +1,7 @@
 module Duple
+
+  # Decorates a Duple::Runner instance with helper methods for executing
+  # Heroku commands.
   class HerokuRunner
     def initialize(runner)
       @runner = runner

@@ -1,6 +1,8 @@
 require 'fileutils'
 
 module Duple
+
+  # Helper class for executing shell commands.
   class Runner
 
     def initialize(options = nil)

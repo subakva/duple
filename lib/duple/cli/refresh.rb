@@ -1,5 +1,18 @@
 module Duple
   module CLI
+
+    # Usage:
+    #   duple refresh
+    #
+    # Options:
+    #   -c, [--config=CONFIG]         # The location of the config file.
+    #   -s, [--source=SOURCE]         # The name of the source environment.
+    #   -t, [--target=TARGET]         # The name of the target environment.
+    #   -g, [--group=GROUP]           # The group configuration to use when dumping source data.
+    #       [--capture]               # Capture a new source snapshot before refreshing.
+    #   -t, [--tables=one two three]  # A list of tables to include when dumping source data.
+    #
+    # Resets and copies schema and data from a source to a target database
     class Refresh < Thor::Group
       include Duple::CLI::Helpers
 

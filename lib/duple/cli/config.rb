@@ -1,5 +1,25 @@
 module Duple
   module CLI
+
+    # Usage:
+    #   duple config [COMMAND]
+    #
+    # Options:
+    #   -c, [--config=CONFIG]  # The location of the config file.
+    #
+    # Manage your configuration.
+    #
+    # Tasks:
+    #   duple config all             # Prints the current configuration.
+    #   duple config environments    # Prints the environment configurations.
+    #   duple config groups          # Prints the group configurations.
+    #   duple config help [COMMAND]  # Describe subcommands or one specific subcommand
+    #   duple config other           # Prints other options.
+    #   duple config post-refresh    # Prints the post-refresh tasks.
+    #   duple config pre-refresh     # Prints the pre-refresh tasks.
+
+    # Options:
+    #   -c, [--config=CONFIG]  # The location of the config file.
     class Config < Thor
       include Duple::CLI::Helpers
 

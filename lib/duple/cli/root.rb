@@ -12,6 +12,8 @@ require 'duple/heroku_runner'
 
 module Duple
   module CLI
+
+    # Configures the high-level structure of the CLI sub-commands.
     class Root < Thor
       include Duple::CLI::Helpers
 

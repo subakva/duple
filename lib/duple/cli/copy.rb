@@ -1,5 +1,19 @@
 module Duple
   module CLI
+
+    # Usage:
+    #   duple copy
+    #
+    # Options:
+    #   -c, [--config=CONFIG]         # The location of the config file.
+    #   -s, [--source=SOURCE]         # The name of the source environment.
+    #   -t, [--target=TARGET]         # The name of the target environment.
+    #   -g, [--group=GROUP]           # The group configuration to use when dumping source data.
+    #       [--capture]               # Capture a new source snapshot before refreshing.
+    #   --dry-run, [--dry-run]        # Perform a dry run of the command. No data will be moved.
+    #   -t, [--tables=one two three]  # A list of tables to include when dumping source data.
+    #
+    # Copies data from a source to a target database.
     class Copy < Thor::Group
       include Duple::CLI::Helpers
 

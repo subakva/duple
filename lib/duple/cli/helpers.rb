@@ -38,7 +38,7 @@ module Duple
 
         def group_option
           class_option :group,
-            desc: 'Name of the group configuration to use when dumping source data.',
+            desc: 'The group configuration to use when dumping source data.',
             type: :string,
             aliases: '-g'
         end

@@ -1,4 +1,7 @@
 module Duple
+
+  # Decorates a Duple::Runner instance with helper methods for executing
+  # PostgreSQL commands.
   class PGRunner
     def initialize(runner)
       @runner = runner
