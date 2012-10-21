@@ -18,7 +18,7 @@ describe Duple::CLI::Structure do
     let(:source) { 'stage' }
     let(:target) { 'development' }
 
-    it 'fetches the source credentials' do
+    it 'fetches the source db config' do
       runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
@@ -57,14 +57,14 @@ describe Duple::CLI::Structure do
     let(:source) { 'production' }
     let(:target) { 'stage' }
 
-    it 'fetches the source credentials' do
+    it 'fetches the source db config' do
       runner.should_receive(:capture).with("heroku config -a duple-production")
         .and_return(heroku_config_response)
 
       invoke_structure
     end
 
-    it 'fetches the target credentials' do
+    it 'fetches the target db config' do
       runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
@@ -103,7 +103,7 @@ describe Duple::CLI::Structure do
     let(:source) { 'development' }
     let(:target) { 'stage' }
 
-    it 'fetches the target credentials' do
+    it 'fetches the target db config' do
       runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 

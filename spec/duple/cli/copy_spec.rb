@@ -16,7 +16,7 @@ describe Duple::CLI::Copy do
   }
 
   context 'with neither tables nor group option' do
-    it 'fetches the source credentials' do
+    it 'fetches the source db config' do
       expect {
         invoke_copy(tables: nil)
       }.to raise_error(ArgumentError, 'One of --group or --tables options is required.')
@@ -27,7 +27,7 @@ describe Duple::CLI::Copy do
     let(:source) { 'stage' }
     let(:target) { 'development' }
 
-    it 'fetches the source credentials' do
+    it 'fetches the source db config' do
       runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
@@ -53,14 +53,14 @@ describe Duple::CLI::Copy do
     let(:source) { 'production' }
     let(:target) { 'stage' }
 
-    it 'fetches the source credentials' do
+    it 'fetches the source db config' do
       runner.should_receive(:capture).with("heroku config -a duple-production")
         .and_return(heroku_config_response)
 
       invoke_copy
     end
 
-    it 'fetches the target credentials' do
+    it 'fetches the target db config' do
       runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 
@@ -86,7 +86,7 @@ describe Duple::CLI::Copy do
     let(:source) { 'development' }
     let(:target) { 'stage' }
 
-    it 'fetches the target credentials' do
+    it 'fetches the target db config' do
       runner.should_receive(:capture).with("heroku config -a duple-stage")
         .and_return(heroku_config_response)
 

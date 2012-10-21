@@ -119,16 +119,40 @@ module Duple
           @structure_file_path ||= File.join(dump_dir_path, filename)
         end
 
-        def fetch_heroku_credentials(appname)
+        def source_db_config
+          @source_db_config ||= if config.heroku_source?
+                                  fetch_heroku_db_config(source_appname)
+                                else
+                                  config.db_config(config.source_name)
+                                end
+        end
+
+        def target_db_config
+          @target_db_config ||= if config.heroku_target?
+                                  fetch_heroku_db_config(target_appname)
+                                else
+                                  config.db_config(config.target_name)
+                                end
+        end
+
+        def fetch_heroku_db_config(appname)
+          # Run the heroku config command first, even if it's a dry run. So
+          # that the command to get the config will show up in the dry run log.
           config_vars = heroku.capture(appname, "config")
 
-          return config.dry_run_credentials(appname) if config.dry_run?
+          if config.dry_run?
+            config.db_config(appname, dry_run: true)
+          else
+            parse_heroku_config(config_vars)
+          end
+        end
 
+        def parse_heroku_config(config_vars)
           db_url = config_vars.split("\n").detect { |l| l =~ /DATABASE_URL/ }
           raise ArgumentError.new("Missing DATABASE_URL variable for #{appname}") if db_url.nil?
 
           db_url.match(
-            /postgres:\/\/(?<user>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<db>.*)/
+            /postgres:\/\/(?<username>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<database>.*)/
           )
         end
 
@@ -157,22 +181,6 @@ module Duple
           exclude_flags = exclude_tables.map { |t| "-T #{t}" }
 
           flags = [ '-Fc -a', include_flags, exclude_flags ].flatten.compact.join(' ')
-        end
-
-        def source_credentials
-          @source_credentials ||= if config.heroku_source?
-                                    fetch_heroku_credentials(source_appname)
-                                  else
-                                    config.local_credentials
-                                  end
-        end
-
-        def target_credentials
-          @target_credentials ||= if config.heroku_target?
-                                    fetch_heroku_credentials(target_appname)
-                                  else
-                                    config.local_credentials
-                                  end
         end
 
         def config

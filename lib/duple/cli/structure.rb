@@ -18,7 +18,7 @@ module Duple
       target_option
 
       def dump_structure
-        postgres.pg_dump('-Fc --no-acl -O -s', structure_file_path, source_credentials)
+        postgres.pg_dump('-Fc --no-acl -O -s', structure_file_path, source_db_config)
       end
 
       def reset_target
@@ -26,7 +26,7 @@ module Duple
       end
 
       def load_structure
-        postgres.pg_restore('-v --no-acl -O -s', structure_file_path, target_credentials)
+        postgres.pg_restore('-v --no-acl -O -s', structure_file_path, target_db_config)
       end
     end
   end

@@ -2,6 +2,54 @@ require 'spec_helper'
 
 describe Duple::Configuration do
 
+
+  describe '#db_config' do
+    let(:config_hash) { YAML.load(File.read('spec/config/simple.yml'))}
+
+    it 'supplies default database values for a local environment' do
+      config = Duple::Configuration.new(config_hash, {})
+      c = config.db_config('development')
+      c[:username].should == 'postgres'
+      c[:password].should == ''
+      c[:host].should == 'localhost'
+      c[:port].should == '5432'
+    end
+
+    context 'with all db config parameters' do
+      let(:db_config_hash) {
+        db_hash = config_hash['environments']['development']
+        db_hash['username'] = 'config_username'
+        db_hash['password'] = 'config_password'
+        db_hash['host'] = 'config_host'
+        db_hash['port'] = '6022'
+        db_hash['database'] = 'config_database'
+        config_hash
+      }
+      let(:config) { Duple::Configuration.new(db_config_hash, {}) }
+      subject(:db_config) { config.db_config('development') }
+
+      it 'loads the options from the config' do
+        db_config[:username].should == 'config_username'
+        db_config[:password].should == 'config_password'
+        db_config[:host].should == 'config_host'
+        db_config[:port].should == '6022'
+        db_config[:database].should == 'config_database'
+      end
+    end
+
+    it 'fails if the database name is missing' do
+      config_hash['environments']['development'].delete('database')
+      config = Duple::Configuration.new(config_hash, {})
+
+      expect {
+        config.db_config('development')
+      }.to raise_error(
+        ArgumentError,
+        'Invalid config: "database" is required for a local environment.'
+      )
+    end
+  end
+
   describe '#excluded_tables' do
     let(:config_hash) { YAML.load(File.read('spec/config/groups.yml'))}
 

@@ -67,7 +67,7 @@ module Duple
       def dump_data
         return unless dump_data?
 
-        postgres.pg_dump(dump_flags, data_file_path, source_credentials)
+        postgres.pg_dump(dump_flags, data_file_path, source_db_config)
       end
 
       def reset_target
@@ -76,9 +76,9 @@ module Duple
 
       def restore_database
         if download_snapshot?
-          postgres.pg_restore('-e -v --no-acl -O -a', @snapshot_path, target_credentials)
+          postgres.pg_restore('-e -v --no-acl -O -a', @snapshot_path, target_db_config)
         elsif dump_data?
-          postgres.pg_restore('-e -v --no-acl -O -a', data_file_path, target_credentials)
+          postgres.pg_restore('-e -v --no-acl -O -a', data_file_path, target_db_config)
         else
           heroku.run(target_appname, "pgbackups:restore DATABASE #{@source_snapshot_url}")
         end

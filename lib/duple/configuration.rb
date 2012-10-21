@@ -125,24 +125,38 @@ module Duple
       tables
     end
 
-    def dry_run_credentials(envname)
+    def db_config(appname, options = nil)
+      options ||= {}
+      options = {dry_run: false}.merge(options)
+
+      if options[:dry_run]
+        db_config_for_dry_run(appname)
+      else
+        db_config_for_app(appname)
+      end
+    end
+
+    def db_config_for_dry_run(appname)
       {
-        user:     "[#{envname}.USER]",
+        username: "[#{envname}.USER]",
         password: "[#{envname}.PASS]",
         host:     "[#{envname}.HOST]",
         port:     "[#{envname}.PORT]",
-        db:       "[#{envname}.DB]"
+        database: "[#{envname}.DB]"
       }
     end
 
-    def local_credentials
-      # TODO: Override these defaults from the config
+    def db_config_for_app(appname)
+      env = environments[appname]
+      if env['database'].nil?
+        raise ArgumentError.new('Invalid config: "database" is required for a local environment.')
+      end
       {
-        user:     'postgres',
-        password: '',
-        host:     'localhost',
-        port:     '5432',
-        db:       'duple_development'
+        username: env['username'] || 'postgres',
+        password: env['password'] || '',
+        host:     env['host'] || 'localhost',
+        port:     env['port'] || '5432',
+        database: env['database']
       }
     end
 

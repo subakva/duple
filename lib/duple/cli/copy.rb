@@ -32,11 +32,11 @@ module Duple
       end
 
       def dump_data
-        postgres.pg_dump(dump_flags, data_file_path, source_credentials)
+        postgres.pg_dump(dump_flags, data_file_path, source_db_config)
       end
 
       def restore_data
-        postgres.pg_restore('-e -v --no-acl -O -a', data_file_path, target_credentials)
+        postgres.pg_restore('-e -v --no-acl -O -a', data_file_path, target_db_config)
       end
     end
   end
