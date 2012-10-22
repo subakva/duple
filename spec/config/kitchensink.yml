@@ -1,0 +1,71 @@
+dump_dir: tmp
+postgres_user: <%= ENV['POSTGRES_DEV_USER'] || 'postgres' %>
+
+environments:
+  development:
+    type: local
+    default_target: true
+
+  backstage:
+    type: heroku
+    appname: duple-backstage
+
+  stage:
+    type: heroku
+    appname: duple-stage
+    default_source: true
+
+  production:
+    type: heroku
+    appname: duple-production
+    allow_target: false
+
+pre_refresh:
+  disable_target:
+    - subject:      target
+      command_type: heroku
+      command:      maintenance:on
+    - subject:      target
+      command_type: heroku
+      command:      ps:scale worker=0
+
+post_refresh:
+  enable_target:
+    - subject:      target
+      command_type: heroku
+      command:      restart
+    - subject:      target
+      command_type: heroku
+      command:      maintenance:off
+    - subject:      target
+      command_type: heroku
+      command:      ps:scale worker=1
+  migrate:
+    - subject:      target
+      command_type: rake
+      command:      db:migrate
+  scrub_data:
+    - subject:      target
+      command_type: rake
+      command:      snapshot:scrub
+  test_data:
+    - subject:      target
+      command_type: rake
+      command:      snapshot:setup_testers
+
+groups:
+  all:
+    include_all: true   # Include all tables
+
+  structure:
+    exclude_all: true   # Exclude all tables (structure only)
+
+  minimal:
+    include_tables:     # Include only the listed tables
+      - categories
+      - links
+
+  no_comments:
+    exclude_tables:     # Include all but the listed tables
+      - comments
+      - comments_posts

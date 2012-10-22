@@ -4,7 +4,7 @@ describe Duple::CLI::Config do
   it 'prints the configuration' do
     result = capture_stdout do
       script = Duple::CLI::Config.new
-      script.invoke(:all, [], {})
+      script.invoke(:all, [], {config: 'spec/config/kitchensink.yml'})
     end
 
     result.should =~ /Environments/
