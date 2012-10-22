@@ -1,0 +1,45 @@
+dump_dir: tmp
+
+environments:
+  development:
+    type: local
+    default_target: true
+    database: duple_development
+
+  stage:
+    type: heroku
+    appname: duple-stage
+    default_source: true
+
+  production:
+    type: heroku
+    appname: duple-production
+    allow_target: false
+
+pre_refresh:
+  prepare_source:
+    - subject:      source
+      command_type: shell
+      command:      rake refresh:prepare
+
+  prepare_target:
+    - subject:      target
+      command_type: heroku
+      command:      maintenance:on
+    - subject:      target
+      command_type: shell
+      command:      rake refresh:prepare
+
+post_refresh:
+  finish_source:
+    - subject:      source
+      command_type: shell
+      command:      rake refresh:finish
+
+  finish_target:
+    - subject:      target
+      command_type: heroku
+      command:      maintenance:off
+    - subject:      target
+      command_type: shell
+      command:      rake refresh:finish

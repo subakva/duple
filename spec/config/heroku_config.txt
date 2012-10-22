@@ -1,0 +1,11 @@
+=== duple-stage Config Vars
+BUNDLE_WITHOUT:               development:test
+DATABASE_URL:                 postgres://pg-user:pg-pass@pg-host:6022/pg-db
+GEM_PATH:                     vendor/bundle/ruby/1.9.1
+HEROKU_POSTGRESQL_COPPER_URL: postgres://pg-user:pg-pass@pg-host:6022/pg-db
+LANG:                         en_US.UTF-8
+PATH:                         bin:vendor/bundle/ruby/1.9.1/bin:/usr/local/bin:/usr/bin:/bin
+PGBACKUPS_URL:                https://pgb-user:pgb-pass@pgbackups.heroku.com/client
+RACK_ENV:                     stage
+RAILS_ENV:                    stage
+TZ:                           America/Los_Angeles

@@ -1,0 +1,35 @@
+dump_dir: tmp
+
+environments:
+  development:
+    type: local
+    default_target: true
+    database: duple_development
+
+  stage:
+    type: heroku
+    appname: duple-stage
+    default_source: true
+
+  production:
+    type: heroku
+    appname: duple-production
+    allow_target: false
+
+groups:
+  all:
+    include_all: true   # Include all tables
+
+  minimal:
+    include_tables:     # Include only the listed tables
+      - categories
+      - links
+
+  all_but_comments:     # Note: This behaves identically to the no_comments group.
+    include_all: true
+    exclude_tables:
+      - comments
+
+  no_comments:
+    exclude_tables:     # Include all but the listed tables
+      - comments
