@@ -293,9 +293,8 @@ describe Duple::CLI::Refresh do
   end
 
   context 'with pre-refresh tasks' do
-    before { pending 'Implement pre-refresh tasks' }
-
     before {
+      stub_prerefresh_tasks
       stub_fetch_url
       stub_fetch_config
       stub_fetch_backups
@@ -305,6 +304,7 @@ describe Duple::CLI::Refresh do
       stub_reset_local
       stub_restore_url
       stub_restore_data
+      stub_postrefresh_tasks
     }
 
     let(:source) { 'production' }
@@ -315,7 +315,7 @@ describe Duple::CLI::Refresh do
       runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
       runner.should_receive(:run).any_number_of_times.ordered.with(/heroku pgbackups/)
 
-      invoke_refresh(table_options.merge(capture: true))
+      invoke_refresh(task_options.merge(capture: true))
     end
 
     it 'executes the tasks in order' do
@@ -352,8 +352,9 @@ describe Duple::CLI::Refresh do
   end
 
   context 'with post-refresh tasks' do
-    before { pending 'Implement post-refresh tasks' }
+    # before { pending 'Implement post-refresh tasks' }
     before {
+      stub_prerefresh_tasks
       stub_fetch_url
       stub_fetch_config
       stub_fetch_backups
@@ -363,6 +364,7 @@ describe Duple::CLI::Refresh do
       stub_reset_local
       stub_restore_url
       stub_restore_data
+      stub_postrefresh_tasks
     }
 
     let(:source) { 'production' }
@@ -371,9 +373,9 @@ describe Duple::CLI::Refresh do
 
     it 'executes the tasks after refreshing' do
       runner.should_receive(:run).any_number_of_times.ordered.with(/heroku pgbackups/)
-      runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
+      runner.should_receive(:run).once.ordered.with('heroku maintenance:off -a duple-stage')
 
-      invoke_refresh(table_options.merge(capture: true))
+      invoke_refresh(task_options.merge(capture: true))
     end
 
     it 'executes the tasks in order' do
@@ -401,7 +403,7 @@ describe Duple::CLI::Refresh do
 
       it 'executes the tasks in order' do
         runner.should_receive(:run).once.ordered.with('rake refresh:finish')
-        runner.should_receive(:run).once.ordered.with('heroku maintenance:on -a duple-stage')
+        runner.should_receive(:run).once.ordered.with('heroku maintenance:off -a duple-stage')
         runner.should_receive(:run).once.ordered.with('heroku run "rake refresh:finish" -a duple-stage')
 
         invoke_refresh(task_options)

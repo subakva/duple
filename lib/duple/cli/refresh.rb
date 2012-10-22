@@ -39,6 +39,46 @@ module Duple
         def dump_data?
           config.local_source? || config.filtered_tables?
         end
+
+        def run_tasks(tasks)
+          tasks.each do |task_name, commands|
+            # TODO - Get knowledge of the config structure out of here. Need something to wrap
+            # the command details and hide the heroku/local differences.
+            commands.each do |cmd_config|
+              subject = cmd_config['subject']
+              command = cmd_config['command']
+              command_type = cmd_config['command_type']
+
+              heroku_subject =
+                (subject == 'source' && config.heroku_source?) ||
+                (subject == 'target' && config.heroku_target?)
+
+              if heroku_subject
+                appname = (subject == 'source') ? source_appname : target_appname
+
+                if command_type == 'shell'
+                  heroku.run(appname, "run \"#{command}\"")
+                elsif command_type == 'heroku'
+                  heroku.run(appname, command)
+                else
+                  # TODO: spec this
+                  # raise ArgumentError.new("Invalid config:
+                  # {command_type} is not a valid command type.")
+                end
+              elsif command_type == 'shell'
+                runner.run(command)
+              else
+                # TODO: verbose?
+                # puts "Skipping command. Type is 'heroku',
+                # but #{config.source_name} is not on Heroku."
+              end
+            end
+          end
+        end
+      end
+
+      def run_prerefresh_tasks
+        run_tasks(config.pre_refresh_tasks)
       end
 
       def capture_snapshot
@@ -82,6 +122,10 @@ module Duple
         else
           heroku.run(target_appname, "pgbackups:restore DATABASE #{@source_snapshot_url}")
         end
+      end
+
+      def run_postrefresh_tasks
+        run_tasks(config.post_refresh_tasks)
       end
     end
   end

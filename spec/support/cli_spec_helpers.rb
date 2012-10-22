@@ -25,6 +25,18 @@ module Duple
       File.read('spec/config/heroku_config.txt')
     end
 
+    def stub_prerefresh_tasks
+      runner.stub(:run).with(/heroku run "rake refresh:prepare/)
+      runner.stub(:run).with(/rake refresh:prepare/)
+      runner.stub(:run).with(/heroku maintenance:on/)
+    end
+
+    def stub_postrefresh_tasks
+      runner.stub(:run).with(/heroku run "rake refresh:finish/)
+      runner.stub(:run).with(/rake refresh:finish/)
+      runner.stub(:run).with(/heroku maintenance:off/)
+    end
+
     def stub_fetch_url
       runner.stub(:capture).with(/heroku pgbackups:url/)
         .and_return(heroku_pgbackups_url_response)
