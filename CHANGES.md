@@ -1,3 +1,7 @@
+## 0.0.3 (October 21, 2012) - Fixed missing template file
+
+  * Fixed missing template file
+
 ## 0.0.2 (October 21, 2012) - Fix local db config
 
   * Load db connection details from the config file.
