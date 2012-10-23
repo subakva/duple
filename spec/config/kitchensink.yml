@@ -1,6 +1,3 @@
-dump_dir: tmp
-postgres_user: <%= ENV['POSTGRES_DEV_USER'] || 'postgres' %>
-
 environments:
   development:
     type: local
@@ -56,9 +53,6 @@ post_refresh:
 groups:
   all:
     include_all: true   # Include all tables
-
-  structure:
-    exclude_all: true   # Exclude all tables (structure only)
 
   minimal:
     include_tables:     # Include only the listed tables

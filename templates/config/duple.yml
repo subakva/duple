@@ -1,71 +1,64 @@
-dump_dir: tmp
-postgres_user: <%= ENV['POSTGRES_DEV_USER'] || 'postgres' %>
-
 environments:
   development:
-    type: local
-    default_target: true
+    type: local                 # The "development" database is hosted on your machine.
+    default_target: true        # Use "development" as the default data target.
+    database: duple_development # The name of the "development" database is "duple_development"
 
   backstage:
-    type: heroku
-    appname: duple-backstage
+    type: heroku                # The "backstage" database is hosted on Heroku.
+    appname: duple-backstage    # The "backstage" app is called "duple-backstage" on Heroku.
 
   stage:
-    type: heroku
-    appname: duple-stage
-    default_source: true
+    type: heroku                # The "stage" database is hosted on Heroku.
+    appname: duple-stage        # The "stage" app is called "duple-stage" on Heroku.
+    default_source: true        # Use "stage" as the default data source.
 
   production:
-    type: heroku
-    appname: duple-production
-    allow_target: false
+    type: heroku                # The "production" database is hosted on Heroku.
+    appname: duple-production   # The "production" app is called "duple-production" on Heroku.
+    allow_target: false         # The "production" database cannot be used as a data target.
 
 pre_refresh:
-  disable_target:
-    - subject:      target
-      command_type: heroku
-      command:      maintenance:on
-    - subject:      target
-      command_type: heroku
-      command:      ps:scale worker=0
+  prepare_source:                         # Defines a set of commands called "prepare_source"
+    - subject:      source                #   Execute "rake refresh:prepare" in the source shell.
+      command_type: shell
+      command:      rake refresh:prepare
+  prepare_target:                         # Defines a set of commands called "prepare_target"
+    - subject:      target                #   Execute "heroku maintenance:on" on the target.
+      command_type: heroku                #   Note: The command will not be executed in a local
+      command:      maintenance:on        #         environment.
+    - subject:      target                #   Execute "rake refresh:prepare" on the target.
+      command_type: shell
+      command:      rake refresh:prepare
 
 post_refresh:
-  enable_target:
-    - subject:      target
-      command_type: heroku
-      command:      restart
-    - subject:      target
+  finish_source:                        # Defines a set of commands called "finish_source"
+    - subject:      source              #   Execute "rake refresh:finish" in the source shell.
+      command_type: shell
+      command:      rake refresh:finish
+
+  finish_target:                        # Defines a set of commands called "finish_source"
+    - subject:      target              #   Execute "heroku maintenance:off" on the target.
       command_type: heroku
       command:      maintenance:off
-    - subject:      target
-      command_type: heroku
-      command:      ps:scale worker=1
-  migrate:
-    - subject:      target
-      command_type: rake
-      command:      db:migrate
-  scrub_data:
-    - subject:      target
-      command_type: rake
-      command:      snapshot:scrub
-  test_data:
-    - subject:      target
-      command_type: rake
-      command:      snapshot:setup_testers
+    - subject:      target              #   Execute "rake refresh:finish" on the target.
+      command_type: shell
+      command:      rake refresh:finish
 
 groups:
-  all:
-    include_all: true   # Include all tables
+  all:                  # Defines a group called "all"
+    include_all: true   #   Include all tables
 
-  structure:
-    exclude_all: true   # Exclude all tables (structure only)
-
-  minimal:
-    include_tables:     # Include only the listed tables
+  minimal:              # Defines a group called "minimal"
+    include_tables:     #   Include only the listed tables
       - categories
       - links
 
-  no_comments:
-    exclude_tables:     # Include all but the listed tables
+  no_comments:          # Defines a group called "no_comments"
+    exclude_tables:     #   Include all but the listed tables
       - comments
-      - comments_posts
+
+  all_but_comments:     # Defines a group called "all_but_comments"
+    include_all: true   #   Include all tables...
+    exclude_tables:     #   Except for comments
+      - comments        #   NOTE: This behaves identically to the no_comments group.
