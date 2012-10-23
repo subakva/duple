@@ -1,5 +1,3 @@
-dump_dir: tmp
-
 environments:
   development:
     type: local

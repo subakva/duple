@@ -1,3 +1,6 @@
 require 'duple/version'
 require 'duple/configuration'
+require 'duple/endpoint'
+require 'duple/source'
+require 'duple/target'
 require 'duple/cli/root'

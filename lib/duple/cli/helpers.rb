@@ -69,120 +69,6 @@ module Duple
       end
 
       module InstanceMethods
-        def default_config_path
-          File.join('config', 'duple.yml')
-        end
-
-        def app_config_path(verify_file = true)
-          config_path = options[:config] || default_config_path
-          if verify_file && !File.exists?(config_path)
-            raise ArgumentError.new("Missing config file: #{config_path}")
-          end
-          config_path
-        end
-
-        def runner
-          @runner ||= Duple::Runner.new(dry_run: config.dry_run?)
-        end
-
-        def postgres
-          @pg_runner ||= Duple::PGRunner.new(runner)
-        end
-
-        def heroku
-          @heroku ||= Duple::HerokuRunner.new(runner)
-        end
-
-        def source_appname
-          @source_appname ||= config.heroku_name(config.source_environment)
-        end
-
-        def target_appname
-          @target_appname ||= config.heroku_name(config.target_environment)
-        end
-
-        def dump_dir_path
-          File.join('tmp', 'duple')
-        end
-
-        def data_file_path
-          @data_file_path ||= File.join(dump_dir_path, "#{config.source_name}-data.dump")
-        end
-
-        def structure_file_path
-          filename = "#{config.source_name}-structure.dump"
-          @structure_file_path ||= File.join(dump_dir_path, filename)
-        end
-
-        def snapshot_file_path(timestamp)
-          filename = "#{config.source_name}-#{timestamp}.dump"
-          @structure_file_path ||= File.join(dump_dir_path, filename)
-        end
-
-        def source_db_config
-          @source_db_config ||= if config.heroku_source?
-                                  fetch_heroku_db_config(source_appname)
-                                else
-                                  config.db_config(config.source_name)
-                                end
-        end
-
-        def target_db_config
-          @target_db_config ||= if config.heroku_target?
-                                  fetch_heroku_db_config(target_appname)
-                                else
-                                  config.db_config(config.target_name)
-                                end
-        end
-
-        def fetch_heroku_db_config(appname)
-          # Run the heroku config command first, even if it's a dry run. So
-          # that the command to get the config will show up in the dry run log.
-          config_vars = heroku.capture(appname, "config")
-
-          if config.dry_run?
-            config.db_config(appname, dry_run: true)
-          else
-            parse_heroku_config(config_vars)
-          end
-        end
-
-        def parse_heroku_config(config_vars)
-          db_url = config_vars.split("\n").detect { |l| l =~ /DATABASE_URL/ }
-          raise ArgumentError.new("Missing DATABASE_URL variable for #{appname}") if db_url.nil?
-
-          db_url.match(
-            /postgres:\/\/(?<username>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<database>.*)/
-          )
-        end
-
-        def fetch_latest_snapshot_time(appname)
-          response = heroku.capture(appname, 'pgbackups')
-          last_line = response.split("\n").last
-          timestring = last_line.match(/\w+\s+(?<timestamp>[\d\s\/\:\.]+)\s+.*/)[:timestamp]
-          DateTime.strptime(timestring, '%Y/%m/%d %H:%M.%S')
-        end
-
-        def reset_database(env)
-          if config.heroku?(env)
-            appname = config.heroku_name(env)
-            heroku.run(appname, 'pg:reset')
-          else
-            # if yes?("Are you sure you want to reset the #{config.target_name} database?", :red)
-            runner.run('bundle exec rake db:drop db:create')
-          end
-        end
-
-        def dump_flags
-          include_tables = config.included_tables
-          include_flags = include_tables.map { |t| "-t #{t}" }
-
-          exclude_tables = config.excluded_tables
-          exclude_flags = exclude_tables.map { |t| "-T #{t}" }
-
-          flags = [ '-Fc -a', include_flags, exclude_flags ].flatten.compact.join(' ')
-        end
-
         def config
           @config ||= parse_config
         end
@@ -193,6 +79,112 @@ module Duple
           erbed = ERB.new(config_data).result
           config_hash = YAML.load(erbed) || {}
           Duple::Configuration.new(config_hash, options)
+        end
+
+        def app_config_path(verify_file = true)
+          config_path = options[:config] || default_config_path
+          if verify_file && !File.exists?(config_path)
+            raise ArgumentError.new("Missing config file: #{config_path}")
+          end
+          config_path
+        end
+
+        def default_config_path
+          File.join('config', 'duple.yml')
+        end
+
+        def source
+          @source ||= Duple::Source.new(config, runner)
+        end
+
+        def target
+          @target ||= Duple::Target.new(config, runner)
+        end
+
+        def runner
+          @runner ||= Duple::Runner.new(dry_run: config.dry_run?)
+        end
+
+        def postgres
+          # TODO: This should go away as the methods are moved into the endpoint classes.
+          @pg_runner ||= Duple::PGRunner.new(runner)
+        end
+
+        def heroku
+          # TODO: This should go away as the methods are moved into the endpoint classes.
+          @heroku ||= Duple::HerokuRunner.new(runner)
+        end
+
+        def source_appname
+          # TODO: This should go away as the methods are moved into the endpoint classes.
+          source.appname
+        end
+
+        def target_appname
+          # TODO: This should go away as the methods are moved into the endpoint classes.
+          target.appname
+        end
+
+        def dump_dir_path
+          # TODO: This should go on the configuration and be configurable.
+          File.join('tmp', 'duple')
+        end
+
+        def data_file_path
+          # TODO: This should go on the configuration and be configurable.
+          @data_file_path ||= File.join(dump_dir_path, "#{config.source_name}-data.dump")
+        end
+
+        def structure_file_path
+          # TODO: This should go on the configuration and be configurable.
+          filename = "#{config.source_name}-structure.dump"
+          @structure_file_path ||= File.join(dump_dir_path, filename)
+        end
+
+        def snapshot_file_path(timestamp)
+          # TODO: This should go on the configuration and be configurable.
+          filename = "#{config.source_name}-#{timestamp}.dump"
+          @structure_file_path ||= File.join(dump_dir_path, filename)
+        end
+
+        def source_db_config
+          # TODO: This should go away as the methods are moved into the endpoint classes.
+          @source_db_config ||= source.db_config
+        end
+
+        def target_db_config
+          # TODO: This should go away as the methods are moved into the endpoint classes.
+          @target_db_config ||= target.db_config
+        end
+
+        def fetch_latest_snapshot_time(appname)
+          # TODO: This should be moved to the heroku endpoint class.
+          response = heroku.capture(appname, 'pgbackups')
+          last_line = response.split("\n").last
+          timestring = last_line.match(/\w+\s+(?<timestamp>[\d\s\/\:\.]+)\s+.*/)[:timestamp]
+          DateTime.strptime(timestring, '%Y/%m/%d %H:%M.%S')
+        end
+
+        def reset_database(env)
+          # TODO: This should be moved to the endpoint classes.
+          if config.heroku?(env)
+            appname = config.heroku_name(env)
+            heroku.run(appname, 'pg:reset')
+          else
+            # if yes?("Are you sure you want to reset the #{config.target_name} database?", :red)
+            runner.run('bundle exec rake db:drop db:create')
+          end
+        end
+
+        def dump_flags
+          # TODO: This should be moved to the endpoint classes.
+          include_tables = config.included_tables
+          include_flags = include_tables.map { |t| "-t #{t}" }
+
+          exclude_tables = config.excluded_tables
+          exclude_flags = exclude_tables.map { |t| "-T #{t}" }
+
+          flags = [ '-Fc -a', include_flags, exclude_flags ].flatten.compact.join(' ')
         end
       end
     end
