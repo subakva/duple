@@ -157,14 +157,6 @@ module Duple
           @target_db_config ||= target.db_config
         end
 
-        def fetch_latest_snapshot_time(appname)
-          # TODO: This should be moved to the heroku endpoint class.
-          response = heroku.capture(appname, 'pgbackups')
-          last_line = response.split("\n").last
-          timestring = last_line.match(/\w+\s+(?<timestamp>[\d\s\/\:\.]+)\s+.*/)[:timestamp]
-          DateTime.strptime(timestring, '%Y/%m/%d %H:%M.%S')
-        end
-
         def reset_database(env)
           # TODO: This should be moved to the endpoint classes.
           if config.heroku?(env)

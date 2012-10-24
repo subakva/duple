@@ -28,6 +28,20 @@ module Duple
       @db_config ||= fetch_db_config
     end
 
+    def snapshot_url
+      @snapshot_url ||= heroku.capture(appname, 'pgbackups:url').strip
+    end
+
+    def latest_snapshot_time
+      unless @snapshot_time
+        response = heroku.capture(appname, 'pgbackups')
+        last_line = response.split("\n").last
+        timestring = last_line.match(/\w+\s+(?<timestamp>[\d\s\/\:\.]+)\s+.*/)[:timestamp]
+        @snapshot_time = DateTime.strptime(timestring, '%Y/%m/%d %H:%M.%S')
+      end
+      @snapshot_time
+    end
+
     def fetch_db_config
       # Run the heroku config command first, even if it's a dry run, so
       # that the command to get the config will show up in the dry run log.

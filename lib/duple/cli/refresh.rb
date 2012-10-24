@@ -90,13 +90,13 @@ module Duple
       def fetch_snapshot_url
         return unless fetch_snapshot_url?
 
-        @source_snapshot_url = heroku.capture(source_appname, 'pgbackups:url').strip
+        @source_snapshot_url = source.snapshot_url
       end
 
       def download_snapshot
         return unless download_snapshot?
 
-        timestamp = fetch_latest_snapshot_time(source_appname)
+        timestamp = source.latest_snapshot_time
 
         @snapshot_path = snapshot_file_path(timestamp.strftime('%Y-%m-%d-%H-%M-%S'))
         unless File.exists?(@snapshot_path)
