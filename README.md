@@ -1,5 +1,8 @@
 # Duple
 
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/subakva/duple)
+[![Build Status](https://secure.travis-ci.org/subakva/duple.png)](http://travis-ci.org/subakva/duple)
+
 Duple makes it easy to move PostgreSQL data around between your deployment
 environments. Duple knows how to move data from one heroku environment to
 another and how to load it into your local database. It can execute rake or
