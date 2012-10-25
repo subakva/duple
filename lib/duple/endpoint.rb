@@ -62,11 +62,31 @@ module Duple
         /postgres:\/\/(?<username>.*):(?<password>.*)@(?<host>.*):(?<port>\d*)\/(?<database>.*)/
       )
     end
+
+    def capture_snapshot
+      heroku.run(appname, 'pgbackups:capture')
+    end
+
+    def execute(cmd)
+      if cmd.shell?
+        heroku.run(appname, "run \"#{cmd.command}\"")
+      elsif cmd.heroku?
+        heroku.run(appname, cmd.command)
+      end
+    end
   end
 
   module PostgreSQLEndpoint
     def db_config
       config.db_config(name)
+    end
+
+    def capture_snapshot
+      # Do nothing. When we have non-local PostgreSQL endpoints, this will need to be implemented.
+    end
+
+    def execute(cmd)
+      runner.run(cmd.command) if cmd.shell?
     end
   end
 end

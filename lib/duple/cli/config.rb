@@ -33,12 +33,15 @@ module Duple
           say
         end
 
-        def print_tasks(header, task_list)
+        def print_tasks(header, tasks)
           say header
           say '-' * 80
-          task_list.each do |task_name, commands|
+          tasks.each do |task|
             say
-            say '  ' + task_name
+            say '  ' + task.name
+            commands = task.commands.map do |c|
+              { subject: c.subject, command_type: c.type, command: c.command }
+            end
             print_table commands, indent: 4
           end
           say

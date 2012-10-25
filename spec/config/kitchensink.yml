@@ -39,16 +39,16 @@ post_refresh:
       command:      ps:scale worker=1
   migrate:
     - subject:      target
-      command_type: rake
-      command:      db:migrate
+      command_type: shell
+      command:      rake db:migrate
   scrub_data:
     - subject:      target
-      command_type: rake
-      command:      snapshot:scrub
+      command_type: shell
+      command:      rake snapshot:scrub
   test_data:
     - subject:      target
-      command_type: rake
-      command:      snapshot:setup_testers
+      command_type: shell
+      command:      rake snapshot:setup_testers
 
 groups:
   all:

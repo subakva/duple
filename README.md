@@ -50,7 +50,11 @@ figure the application. Read and modify it, or clear it out and write your own.
 
 ## Future
 
-  * Pre- and post- refresh hooks
+  * Custom error classes.
+  * Improve documentation
+  * Support non-Heroku remote PostgreSQL servers.
+  * Move knowledge of endpoint types out of Thor tasks.
+
   * Support for skipping pre- and post- refresh steps.
   * Support for running pre- and post- refresh steps by themselves.
   * Support for other data stores.

@@ -115,11 +115,6 @@ module Duple
           @heroku ||= Duple::HerokuRunner.new(runner)
         end
 
-        def source_appname
-          # TODO: This should go away as the methods are moved into the endpoint classes.
-          source.appname
-        end
-
         def target_appname
           # TODO: This should go away as the methods are moved into the endpoint classes.
           target.appname

@@ -61,5 +61,14 @@ describe Duple::Runner do
       runner.capture('date')
       recorder.string.split("\n").should == ['ls tmp', 'date']
     end
+
+    context 'that is not I/O-like' do
+      let(:recorder) { "" }
+      it 'raises an error' do
+        expect {
+          runner.capture('date')
+        }.to raise_error(ArgumentError, 'Invalid :recorder option: ')
+      end
+    end
   end
 end

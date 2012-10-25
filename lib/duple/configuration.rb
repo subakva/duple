@@ -1,3 +1,5 @@
+require 'duple/config/task'
+
 module Duple
 
   # Represents the configuration that will be used to perform the data
@@ -181,23 +183,11 @@ module Duple
     end
 
     def pre_refresh_tasks
-      raw_config['pre_refresh'] || {}
-    end
-
-    def pre_refresh_task(task_name)
-      task = pre_refresh_tasks[task_name]
-      raise ArgumentError.new("Invalid pre_refresh task: #{task_name}") if task.nil?
-      task
+      @pre_refresh_tasks ||= build_tasks(raw_config['pre_refresh'])
     end
 
     def post_refresh_tasks
-      raw_config['post_refresh'] || {}
-    end
-
-    def post_refresh_task(task_name)
-      task = post_refresh_tasks[task_name]
-      raise ArgumentError.new("Invalid post_refresh task: #{task_name}") if task.nil?
-      task
+      @post_refresh_tasks ||= build_tasks(raw_config['post_refresh'])
     end
 
     def other_options
@@ -205,6 +195,13 @@ module Duple
     end
 
     protected
+
+    def build_tasks(task_hash)
+      return [] if task_hash.nil?
+      task_hash.map do |name, command_list|
+        Duple::Config::Task.new(name, command_list)
+      end
+    end
 
     def env_names_by_flag(flag_name, flag_value, allow_multiple = false)
       matching_envs = environments.select { |n, c| c[flag_name] == flag_value }

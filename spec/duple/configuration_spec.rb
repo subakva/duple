@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe Duple::Configuration do
 
-
   describe '#db_config' do
     let(:config_hash) { YAML.load(File.read('spec/config/simple.yml'))}
 

@@ -53,10 +53,6 @@ module Duple
       @options[:recorder]
     end
 
-    def live?
-      !@options[:dry_run]
-    end
-
     def dry_run?
       @options[:dry_run]
     end

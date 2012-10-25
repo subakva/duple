@@ -13,7 +13,7 @@ begin
     cane.abc_max = 15
     cane.style_measure = 100
     cane.style_glob = '{lib}/**/*.rb'
-    cane.gte = {'coverage/covered_percent' => 95}
+    cane.gte = {'coverage/covered_percent' => 98}
   end
 rescue LoadError
   warn "cane not available, quality task not provided."
