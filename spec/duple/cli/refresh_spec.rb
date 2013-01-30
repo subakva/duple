@@ -127,6 +127,7 @@ describe Duple::CLI::Refresh do
       runner.should_receive(:run).once.ordered.with(/heroku pgbackups:capture/)
       runner.should_receive(:capture).once.ordered.with(/heroku pgbackups:url/).and_return(heroku_pgbackups_url_response)
       runner.should_receive(:capture).once.ordered.with(/heroku pgbackups/).and_return(heroku_pgbackups_response)
+      runner.should_receive(:run).once.ordered.with(/mkdir -p/)
       runner.should_receive(:run).once.ordered.with(/curl/)
       runner.should_receive(:run).once.ordered.with(/rake db:drop db:create/)
       runner.should_receive(:run).once.ordered.with(/pg_restore/)
@@ -154,7 +155,8 @@ describe Duple::CLI::Refresh do
     end
 
     it 'downloads the snapshot from the snapshot URL' do
-      runner.should_receive(:run).with(%{curl -o #{snapshot_path} #{heroku_pgbackups_url_response.strip}})
+      runner.should_receive(:run).with(%{mkdir -p #{snapshot_dir}})
+      runner.should_receive(:run).with(%{curl -o #{snapshot_path} "#{heroku_pgbackups_url_response.strip}"})
 
       invoke_refresh
     end

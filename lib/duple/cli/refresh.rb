@@ -67,7 +67,8 @@ module Duple
 
         @snapshot_path = snapshot_file_path(timestamp.strftime('%Y-%m-%d-%H-%M-%S'))
         unless File.exists?(@snapshot_path)
-          runner.run("curl -o #{@snapshot_path} #{@source_snapshot_url}")
+          runner.run("mkdir -p #{File.dirname(@snapshot_path)}")
+          runner.run("curl -o #{@snapshot_path} \"#{@source_snapshot_url}\"")
         end
       end
 
