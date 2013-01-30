@@ -4,6 +4,7 @@ module Duple
       base.send(:let, :runner) { double_runner }
       base.send(:let, :source) { 'stage' }
       base.send(:let, :target) { 'development' }
+      base.send(:let, :snapshot_dir) { 'tmp/duple' }
       base.send(:let, :snapshot_path) { 'tmp/duple/stage-2012-10-19-03-09-30.dump' }
     end
 
@@ -53,6 +54,7 @@ module Duple
     end
 
     def stub_download_snapshot
+      runner.stub(:run).with(/mkdir -p/)
       runner.stub(:run).with(/curl/)
     end
 
